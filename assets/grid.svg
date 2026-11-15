@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Layout grid for a 1024 icon. Overlay via: node scripts/render.js icon.svg --grid
+       Cyan = iOS mask + guides. Magenta = Android "maskable" safe circle (80%).
+       Dashed inner square = the zone where the main glyph normally lives (center ~62%). -->
+  <g fill="none" stroke="#19d3ff" stroke-opacity="0.75" stroke-width="2">
+    <path d="M512,0 C743.4,0 884.7,0 954.4,69.6 C1024,139.3 1024,280.6 1024,512 C1024,743.4 1024,884.7 954.4,954.4 C884.7,1024 743.4,1024 512,1024 C280.6,1024 139.3,1024 69.6,954.4 C0,884.7 0,743.4 0,512 C0,280.6 0,139.3 69.6,69.6 C139.3,0 280.6,0 512,0 Z"/>
+    <circle cx="512" cy="512" r="471"/>
+    <circle cx="512" cy="512" r="358"/>
+    <circle cx="512" cy="512" r="286"/>
+    <circle cx="512" cy="512" r="194"/>
+    <circle cx="512" cy="512" r="102"/>
+    <line x1="512" y1="0" x2="512" y2="1024"/>
+    <line x1="0" y1="512" x2="1024" y2="512"/>
+    <line x1="0" y1="0" x2="1024" y2="1024" stroke-opacity="0.35"/>
+    <line x1="1024" y1="0" x2="0" y2="1024" stroke-opacity="0.35"/>
+    <rect x="194" y="194" width="636" height="636" stroke-dasharray="14 10"/>
+  </g>
+  <circle cx="512" cy="512" r="409.6" fill="none" stroke="#ff2bd6" stroke-opacity="0.7" stroke-width="2" stroke-dasharray="6 8"/>
+  <g font-family="-apple-system, Inter, Helvetica, Arial, sans-serif" font-size="22" fill="#19d3ff" fill-opacity="0.9">
+    <text x="208" y="184">glyph zone ~62%</text>
+    <text x="20" y="1004">iOS mask</text>
+    <text x="760" y="1004" fill="#ff2bd6">maskable 80%</text>
+  </g>
+</svg>

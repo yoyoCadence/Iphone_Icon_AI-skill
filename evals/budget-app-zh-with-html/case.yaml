@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: budget-app-zh-with-html
+expected_outcome: |
+  An icon designed for a budgeting app (a finance metaphor with a specific twist, e.g. a rendered
+  coin with a rising arrow, stacked coins, a jar — not a bare circle/square on a gradient), using
+  or deliberately departing from the page's teal/amber brand colours. Files produced: icon.svg,
+  icons/icon-1024.png, icons/icon-512.png, icons/icon-192.png, icons/apple-touch-icon.png (180×180,
+  opaque), icons/preview.png, manifest.webmanifest; index.html head gains the apple-touch-icon link,
+  manifest link, theme-color and apple-mobile-web-app-title "小帳本", and the old apple-touch-icon
+  link is removed. The response is in Traditional Chinese, states the concept, and shows/points to
+  the preview.
+context:
+  scaffold_script: place-files.sh

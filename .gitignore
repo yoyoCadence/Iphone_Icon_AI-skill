@@ -1,0 +1,5 @@
+node_modules/
+*.skill
+evals/results/
+*-workspace/
+.DS_Store

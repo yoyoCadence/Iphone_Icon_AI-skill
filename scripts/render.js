@@ -1,0 +1,319 @@
+#!/usr/bin/env node
+'use strict';
+/**
+ * render.js — turn an icon SVG into every PNG an iPhone / PWA home-screen icon needs,
+ * plus a "home screen preview" sheet so the icon can be judged at the sizes people see.
+ *
+ * Usage:
+ *   node render.js <icon.svg> [--out <dir>] [--label "App name"] [--sizes 1024,512,192,180]
+ *                             [--no-preview] [--grid] [--quiet]
+ *
+ * Outputs (in --out, default: ./icons next to the SVG):
+ *   icon.svg               copy of the source (kept so the HTML can also link an SVG favicon)
+ *   icon-1024.png          master (App Store / source of truth)
+ *   apple-touch-icon.png   180×180 — what iOS puts on the home screen
+ *   icon-512.png           manifest (Android / desktop PWA; also used as "maskable")
+ *   icon-192.png           manifest
+ *   icon-<n>.png           any extra size passed via --sizes
+ *   preview.png            home-screen mock (dark + light wallpaper, small sizes) — LOOK AT THIS
+ *   grid.png               (with --grid) 1024 render with the icon grid overlaid
+ *
+ * Renderer: Playwright + Chromium (full SVG filter support: blur, drop shadow, turbulence,
+ * blend modes, system fonts). Falls back to rsvg-convert / ImageMagick when Playwright is
+ * missing, with reduced fidelity for filters.
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { execSync, spawnSync } = require('child_process');
+
+const HELP = `render.js — render an icon SVG to iPhone/PWA PNG sizes + a home-screen preview sheet
+
+  node render.js <icon.svg> [options]
+
+  --out <dir>        output directory (default: <svg dir>/icons)
+  --label <text>     app name shown under the icon in the preview (default: "App")
+  --sizes <list>     comma list of extra PNG sizes (default adds none beyond 1024,512,192,180)
+  --no-preview       skip preview.png
+  --grid             also write grid.png (icon with the layout grid overlaid)
+  --quiet            less logging
+`;
+
+// The iOS "squircle" (continuous-curvature rounded square), normalized to a 0..1 box.
+// Only used for the PREVIEW — the real apple-touch-icon must stay a full-bleed square,
+// because iOS applies this mask itself.
+const SQUIRCLE = [
+  'M0.5,0',
+  'C0.726,0 0.864,0 0.932,0.068',
+  'C1,0.136 1,0.274 1,0.5',
+  'C1,0.726 1,0.864 0.932,0.932',
+  'C0.864,1 0.726,1 0.5,1',
+  'C0.274,1 0.136,1 0.068,0.932',
+  'C0,0.864 0,0.726 0,0.5',
+  'C0,0.274 0,0.136 0.068,0.068',
+  'C0.136,0 0.274,0 0.5,0 Z',
+].join(' ');
+
+function die(msg) {
+  console.error(`render.js: ${msg}`);
+  process.exit(1);
+}
+
+function parseArgs(argv) {
+  const args = { svg: null, out: null, label: 'App', sizes: [], preview: true, grid: false, quiet: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--out' || a === '-o') args.out = argv[++i];
+    else if (a === '--label') args.label = argv[++i];
+    else if (a === '--sizes') args.sizes = String(argv[++i]).split(',').map((s) => parseInt(s, 10)).filter((n) => n > 0);
+    else if (a === '--no-preview') args.preview = false;
+    else if (a === '--grid') args.grid = true;
+    else if (a === '--quiet') args.quiet = true;
+    else if (a === '--help' || a === '-h') { console.log(HELP); process.exit(0); }
+    else if (a.startsWith('-')) die(`unknown option ${a}\n${HELP}`);
+    else if (!args.svg) args.svg = a;
+    else die(`unexpected argument ${a}`);
+  }
+  if (!args.svg) die(`missing <icon.svg>\n${HELP}`);
+  if (!fs.existsSync(args.svg)) die(`no such file: ${args.svg}`);
+  if (!args.out) args.out = path.join(path.dirname(path.resolve(args.svg)), 'icons');
+  return args;
+}
+
+/** Make sure the root <svg> has a square viewBox; strip fixed width/height so CSS can size it. */
+function normalizeSvg(svgText) {
+  const m = svgText.match(/<svg\b[^>]*>/i);
+  if (!m) die('input does not look like an SVG (no <svg> root element)');
+  let root = m[0];
+  const vb = root.match(/viewBox\s*=\s*"([^"]+)"/i);
+  let viewBox = vb ? vb[1].trim().split(/[\s,]+/).map(Number) : null;
+  if (!viewBox || viewBox.length !== 4) {
+    const w = parseFloat((root.match(/\bwidth\s*=\s*"([\d.]+)/i) || [])[1]);
+    const h = parseFloat((root.match(/\bheight\s*=\s*"([\d.]+)/i) || [])[1]);
+    if (!w || !h) die('SVG needs a viewBox (e.g. viewBox="0 0 1024 1024")');
+    viewBox = [0, 0, w, h];
+    root = root.replace(/<svg\b/i, `<svg viewBox="0 0 ${w} ${h}"`);
+  }
+  if (Math.abs(viewBox[2] - viewBox[3]) > 0.01) {
+    console.warn(`render.js: WARNING viewBox is not square (${viewBox[2]}×${viewBox[3]}); the icon will be stretched.`);
+  }
+  root = root.replace(/\s(width|height)\s*=\s*"[^"]*"/gi, '');
+  if (!/preserveAspectRatio/i.test(root)) root = root.replace(/<svg\b/i, '<svg preserveAspectRatio="xMidYMid meet"');
+  return svgText.replace(m[0], root);
+}
+
+function loadPlaywright() {
+  const names = ['playwright', 'playwright-core'];
+  for (const n of names) { try { return require(n); } catch (_) { /* next */ } }
+  try {
+    const root = execSync('npm root -g', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    for (const n of names) { try { return require(path.join(root, n)); } catch (_) { /* next */ } }
+  } catch (_) { /* no npm */ }
+  return null;
+}
+
+async function launchBrowser(pw) {
+  const opts = { headless: true };
+  if (process.env.ICON_CHROME_PATH) opts.executablePath = process.env.ICON_CHROME_PATH;
+  try {
+    return await pw.chromium.launch(opts);
+  } catch (e) {
+    const candidates = ['/opt/pw-browsers/chromium', '/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome',
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        try { return await pw.chromium.launch({ ...opts, executablePath: c }); } catch (_) { /* next */ }
+      }
+    }
+    throw new Error(`could not launch Chromium (${e.message}).\n  Fix: npx playwright install chromium   (or set ICON_CHROME_PATH=/path/to/chrome)`);
+  }
+}
+
+async function renderSize(browser, svgText, size, file) {
+  const page = await browser.newPage({ viewport: { width: size, height: size }, deviceScaleFactor: 1 });
+  const html = `<!doctype html><html><head><meta charset="utf-8"><style>
+    html,body{margin:0;padding:0;background:transparent;overflow:hidden}
+    svg{display:block;width:${size}px;height:${size}px}
+  </style></head><body>${svgText}</body></html>`;
+  await page.setContent(html, { waitUntil: 'load' });
+  await page.evaluate(() => document.fonts && document.fonts.ready);
+  await page.waitForTimeout(50);
+  await page.screenshot({ path: file, omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
+  await page.close();
+}
+
+function previewHtml(pngDataUrl, label) {
+  const placeholderPalettes = [
+    ['#5b6b8a', '#3b4660'], ['#8a6f5b', '#5e4a3a'], ['#5b8a7a', '#3a5e52'], ['#7a5b8a', '#4f3a5e'],
+    ['#8a5b5b', '#5e3a3a'], ['#5b7a8a', '#3a4f5e'], ['#8a8a5b', '#5e5e3a'],
+  ];
+  const placeholders = (n) => Array.from({ length: n }, (_, i) => {
+    const [a, b] = placeholderPalettes[i % placeholderPalettes.length];
+    return `<div class="cell"><div class="icon sq" style="background:linear-gradient(180deg,${a},${b})">
+      <div class="ph"></div></div><div class="lbl">App ${i + 2}</div></div>`;
+  }).join('');
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const name = esc(label);
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+  :root{--f:-apple-system,"SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif}
+  html,body{margin:0;padding:0}
+  body{width:1800px;background:#0e0e11;color:#cfd0d6;font-family:var(--f)}
+  .sheet{display:grid;grid-template-columns:520px 1fr;gap:36px;padding:36px}
+  .sq{clip-path:url(#squircle)}
+  .hero{display:flex;flex-direction:column;align-items:center;gap:22px;background:#1a1a20;border-radius:28px;padding:40px 20px}
+  .hero .icon{width:420px;height:420px}
+  .hero .icon img{width:100%;height:100%;display:block}
+  .hero h1{font-size:30px;margin:0;color:#fff;font-weight:600}
+  .hero p{margin:0;font-size:18px;color:#8e8f99;text-align:center;line-height:1.5}
+  .panel{border-radius:28px;padding:36px 28px 20px}
+  .dark{background:radial-gradient(circle at 25% 15%,#3d3f7a 0%,#1b1c33 45%,#0d0e1b 100%)}
+  .light{background:linear-gradient(160deg,#fbe3d3 0%,#e9e3f5 50%,#d3e2fb 100%)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px 0;justify-items:center}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .icon{width:120px;height:120px;position:relative;overflow:hidden}
+  .icon img{width:100%;height:100%;display:block}
+  .ph{position:absolute;left:32px;top:32px;width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.22)}
+  .lbl{font-size:22px;letter-spacing:-.01em}
+  .dark .lbl{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .light .lbl{color:#1b1b1f}
+  .right{display:flex;flex-direction:column;gap:36px}
+  .sizes{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:36px}
+  .sizes .panel{display:flex;align-items:flex-end;justify-content:space-around;gap:20px;padding:34px 28px}
+  .s{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .s .icon img{width:100%;height:100%}
+  .s small{font-size:16px;opacity:.75}
+  .dark .s small{color:#fff}.light .s small{color:#1b1b1f}
+  .cap{font-size:15px;color:#6e6f78;padding:0 36px 24px;line-height:1.5}
+  </style></head><body>
+  <svg width="0" height="0" style="position:absolute"><defs><clipPath id="squircle" clipPathUnits="objectBoundingBox"><path d="${SQUIRCLE}"/></clipPath></defs></svg>
+  <div class="sheet">
+    <div class="hero">
+      <div class="icon sq"><img src="${pngDataUrl}" alt=""></div>
+      <h1>${name}</h1>
+      <p>1024 master, masked the way iOS masks it.<br>Judge composition, lighting and color here.</p>
+    </div>
+    <div class="right">
+      <div class="panel dark"><div class="grid">
+        <div class="cell"><div class="icon sq"><img src="${pngDataUrl}" alt=""></div><div class="lbl">${name}</div></div>
+        ${placeholders(7)}
+      </div></div>
+      <div class="panel light"><div class="grid">
+        <div class="cell"><div class="icon sq"><img src="${pngDataUrl}" alt=""></div><div class="lbl">${name}</div></div>
+        ${placeholders(7)}
+      </div></div>
+    </div>
+    <div class="sizes">
+      <div class="panel dark">
+        <div class="s"><div class="icon sq" style="width:120px;height:120px"><img src="${pngDataUrl}" alt=""></div><small>60pt · home</small></div>
+        <div class="s"><div class="icon sq" style="width:80px;height:80px"><img src="${pngDataUrl}" alt=""></div><small>40pt · spotlight</small></div>
+        <div class="s"><div class="icon sq" style="width:58px;height:58px"><img src="${pngDataUrl}" alt=""></div><small>29pt · settings</small></div>
+        <div class="s"><div class="icon sq" style="width:40px;height:40px"><img src="${pngDataUrl}" alt=""></div><small>20pt · notif</small></div>
+      </div>
+      <div class="panel light">
+        <div class="s"><div class="icon sq" style="width:120px;height:120px"><img src="${pngDataUrl}" alt=""></div><small>60pt · home</small></div>
+        <div class="s"><div class="icon sq" style="width:80px;height:80px"><img src="${pngDataUrl}" alt=""></div><small>40pt · spotlight</small></div>
+        <div class="s"><div class="icon sq" style="width:58px;height:58px"><img src="${pngDataUrl}" alt=""></div><small>29pt · settings</small></div>
+        <div class="s"><div class="icon sq" style="width:40px;height:40px"><img src="${pngDataUrl}" alt=""></div><small>20pt · notif</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="cap">Rendered at 2× (1pt = 2px). The squircle mask here is a close approximation of the one iOS applies; the exported PNGs stay square on purpose.</div>
+  </body></html>`;
+}
+
+async function renderPreview(browser, masterPng, label, file) {
+  const dataUrl = 'data:image/png;base64,' + fs.readFileSync(masterPng).toString('base64');
+  const page = await browser.newPage({ viewport: { width: 1800, height: 1000 }, deviceScaleFactor: 1 });
+  await page.setContent(previewHtml(dataUrl, label), { waitUntil: 'load' });
+  await page.evaluate(() => document.fonts && document.fonts.ready);
+  await page.waitForTimeout(80);
+  await page.screenshot({ path: file, fullPage: true });
+  await page.close();
+}
+
+async function renderGrid(browser, masterPng, gridSvgPath, file) {
+  const dataUrl = 'data:image/png;base64,' + fs.readFileSync(masterPng).toString('base64');
+  const grid = fs.readFileSync(gridSvgPath, 'utf8');
+  const page = await browser.newPage({ viewport: { width: 1024, height: 1024 }, deviceScaleFactor: 1 });
+  await page.setContent(`<!doctype html><html><head><style>html,body{margin:0}
+    .w{position:relative;width:1024px;height:1024px}.w img,.w svg{position:absolute;inset:0;width:1024px;height:1024px}</style></head>
+    <body><div class="w"><img src="${dataUrl}">${grid}</div></body></html>`, { waitUntil: 'load' });
+  await page.screenshot({ path: file, clip: { x: 0, y: 0, width: 1024, height: 1024 } });
+  await page.close();
+}
+
+/** Fallback without a browser: rsvg-convert or ImageMagick. Filters/blend modes may degrade. */
+function fallbackRender(svgPath, size, file) {
+  const tryCmd = (cmd, argv) => {
+    const r = spawnSync(cmd, argv, { stdio: 'ignore' });
+    return r.status === 0 && fs.existsSync(file);
+  };
+  if (tryCmd('rsvg-convert', ['-w', String(size), '-h', String(size), '-o', file, svgPath])) return 'rsvg-convert';
+  if (tryCmd('magick', ['-background', 'none', '-density', '300', svgPath, '-resize', `${size}x${size}`, file])) return 'magick';
+  if (tryCmd('convert', ['-background', 'none', '-density', '300', svgPath, '-resize', `${size}x${size}`, file])) return 'convert';
+  return null;
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const log = (...a) => { if (!args.quiet) console.log(...a); };
+  const raw = fs.readFileSync(args.svg, 'utf8');
+  const svgText = normalizeSvg(raw);
+  fs.mkdirSync(args.out, { recursive: true });
+  fs.writeFileSync(path.join(args.out, 'icon.svg'), raw);
+
+  const plan = [
+    { size: 1024, name: 'icon-1024.png' },
+    { size: 512, name: 'icon-512.png' },
+    { size: 192, name: 'icon-192.png' },
+    { size: 180, name: 'apple-touch-icon.png' },
+    ...args.sizes.filter((s) => ![1024, 512, 192, 180].includes(s)).map((s) => ({ size: s, name: `icon-${s}.png` })),
+  ];
+
+  const pw = loadPlaywright();
+  if (!pw) {
+    console.warn('render.js: Playwright not found — using fallback renderer (filters may look wrong).');
+    console.warn('           For full fidelity: npm i -D playwright && npx playwright install chromium');
+    const tmpSvg = path.join(args.out, '.normalized.svg');
+    fs.writeFileSync(tmpSvg, svgText.replace(/<svg\b/i, '<svg width="1024" height="1024"'));
+    let used = null;
+    for (const p of plan) {
+      used = fallbackRender(tmpSvg, p.size, path.join(args.out, p.name));
+      if (!used) die('no renderer available. Install Playwright (npm i -D playwright && npx playwright install chromium) or rsvg-convert.');
+      log(`  ${p.name}  (${p.size}×${p.size}, via ${used})`);
+    }
+    fs.unlinkSync(tmpSvg);
+    console.warn('render.js: preview.png skipped (needs Playwright).');
+    return;
+  }
+
+  const browser = await launchBrowser(pw);
+  try {
+    for (const p of plan) {
+      const file = path.join(args.out, p.name);
+      await renderSize(browser, svgText, p.size, file);
+      log(`  ${p.name}  (${p.size}×${p.size})`);
+    }
+    const master = path.join(args.out, 'icon-1024.png');
+    if (args.preview) {
+      const file = path.join(args.out, 'preview.png');
+      await renderPreview(browser, master, args.label, file);
+      log(`  preview.png  ← open this and look at it before deciding the icon is done`);
+    }
+    if (args.grid) {
+      const gridSvg = path.join(__dirname, '..', 'assets', 'grid.svg');
+      if (fs.existsSync(gridSvg)) {
+        const file = path.join(args.out, 'grid.png');
+        await renderGrid(browser, master, gridSvg, file);
+        log(`  grid.png  (icon + layout grid)`);
+      } else {
+        console.warn('render.js: assets/grid.svg not found, skipping grid.png');
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+  log(`done → ${args.out}`);
+}
+
+main().catch((e) => { console.error(`render.js: ${e.message}`); process.exit(1); });

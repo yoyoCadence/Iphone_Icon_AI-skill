@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: dark-dev-tool
+expected_outcome: |
+  A dark-tile icon (dark hue, not pure black) with a luminous or rendered developer metaphor that
+  has a twist beyond the bare "</>" or ">_" cliché (or uses the cliché with a specific material
+  treatment), glyph large enough to read at 29pt. PNG set and preview written under
+  ./public/icons, head tags provided (pointing at /icons/… web paths), apple-mobile-web-app-title
+  "Shellf".

@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: surf-pwa-no-code
+expected_outcome: |
+  A distinctive surf/ocean icon (e.g. a breaking wave backlit by a sun, horizon scene, or a rendered
+  object) built from the brand colour #0E7490 with a hue-shifted gradient, rendered to
+  icons/icon-1024.png, icon-512.png, icon-192.png, apple-touch-icon.png (180, opaque), with
+  preview.png. Because there is no HTML, the response prints the <head> block and the
+  manifest.webmanifest content (inject.py --print or equivalent), names the concept, and mentions
+  the short name "Swell". No emoji is used in the icon.
