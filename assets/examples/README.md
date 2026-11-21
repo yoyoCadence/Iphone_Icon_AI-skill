@@ -3,8 +3,11 @@
 Four icons produced with this skill's own pipeline, each with the concept note that preceded the
 SVG. They exist to calibrate the quality bar and to show one recipe each — copy the *approach*,
 never the icon. **If a brief falls in one of these categories (surf/ocean, budgeting/coins,
-terminals, meditation), the example is now the cliché:** pick a different object, moment or style.
-Test runs showed agents drifting toward the nearest example's palette and motif when they didn't.
+terminals, meditation), don't reuse the example's twist, palette or execution** — test runs showed
+agents drifting toward the nearest example. Do keep the category's core sign (the prompt for a terminal,
+a coin or ledger for money) when the icon needs it to read at 29pt; a run that dropped the prompt
+entirely to look different produced a unique icon that read as "@" at small size. If the user's real
+brand colours match an example's, the brand wins — differ in object and composition instead.
 
 ![gallery](gallery.png)
 

@@ -36,9 +36,9 @@
       <stop offset="0" stop-color="#FFF6D6" stop-opacity="0.7"/>
       <stop offset="0.6" stop-color="#FFF6D6" stop-opacity="0"/>
     </linearGradient>
-    <filter id="ao" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="34"/></filter>
-    <filter id="soft" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="18"/></filter>
-    <filter id="inner" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+    <filter id="ao" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="34"/></filter>
+    <filter id="soft" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="inner" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536">
       <feOffset dx="-5" dy="-12"/><feGaussianBlur stdDeviation="14" result="ob"/>
       <feComposite operator="out" in="SourceGraphic" in2="ob" result="inv"/>
       <feFlood flood-color="#7A4200" flood-opacity="0.55" result="col"/>

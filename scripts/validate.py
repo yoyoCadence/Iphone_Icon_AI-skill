@@ -158,13 +158,19 @@ def analyse(path: Path):
             findings.append(("warn", f"glyph spans {ext*100:.0f}% of the icon — it touches the mask (iOS crops corners, Android a circle)"))
         else:
             findings.append(("ok", f"glyph spans {ext*100:.0f}% of the icon (bounding box)"))
-        if not scene:
-            note = (f"subject covers {coverage*100:.0f}% of the tile area — reference: solid objects read best at ~28–45%, "
-                    "line/glow glyphs at ~10–20% with contrast ≥ 4:1. The bounding box can look big while the subject is small; "
-                    "compare against the bright neighbours in preview.png")
-            findings.append(("warn" if coverage < 0.08 or coverage > 0.7 else "ok", note))
+        note = (f"subject covers {coverage*100:.0f}% of the tile area — reference: solid objects read best at ~28–45%, "
+                "line/glow glyphs at ~10–20% with contrast ≥ 4:1. The bounding box can look big while the subject is small; "
+                "compare against the bright neighbours in preview.png")
+        if scene:
+            findings.append(("ok", f"subject coverage {coverage*100:.0f}% (background texture inflates this for scenes; "
+                                   "judge the focal shape by eye)"))
+        else:
+            findings.append(("warn" if coverage < 0.10 or coverage > 0.7 else "ok", note))
         off = math.hypot(cx - 0.5, cy - 0.5)
-        if off > 0.06:
+        if scene:
+            findings.append(("ok", f"focal mass at (cx={cx:.2f}, cy={cy:.2f}) — scenes may compose off-centre; keep the focal shape "
+                                   "inside the centre 62%"))
+        elif off > 0.06:
             findings.append(("warn", f"visual centre of mass is off by {off*100:.0f}% (cx={cx:.2f}, cy={cy:.2f}); fine if deliberate, "
                                      "but optical centring usually means ≤3% and slightly ABOVE geometric centre"))
         else:
@@ -177,7 +183,7 @@ def analyse(path: Path):
         if outside_sq / len(edge) > 0.01 and not scene:
             findings.append(("warn", f"{outside_sq/len(edge)*100:.0f}% of detail lies in the corners iOS masks away — "
                                      "unless it is background texture, pull it inward"))
-        if outside_mask / len(edge) > 0.08 and not scene:
+        if outside_mask / len(edge) > (0.25 if scene else 0.03):
             findings.append(("warn", f"{outside_mask/len(edge)*100:.0f}% of detail lies outside the Android maskable safe circle (80%) — "
                                      "acceptable for iOS-only, otherwise keep the core glyph inside"))
 
@@ -229,7 +235,8 @@ def analyse(path: Path):
     significant = [c for c, _ in counts if c / (n * n) > 0.004]
     metrics["significant_colours"] = len(significant)
     if len(significant) < 4:
-        findings.append(("warn", f"only {len(significant)} significant colours — reads as flat clip-art; add gradient, light and shadow"))
+        findings.append(("warn", f"only {len(significant)} significant colours — expected for a flat block-out; for the final "
+                                 "icon add gradient, light and shadow or it reads as clip-art"))
     else:
         findings.append(("ok", f"{len(significant)} significant colours (tonal depth present)"))
 

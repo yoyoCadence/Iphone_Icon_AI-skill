@@ -30,9 +30,11 @@ Options
   --no-standalone       do not add the standalone (app-like) metas
   --manifest <file>     manifest filename for a NEW manifest   (default: manifest.webmanifest)
   --force               rewire a page that already has icon/manifest links
-  --print               no page to edit (or you only want the snippet): write head-snippet.html and
-                        the manifest into --out (default: current folder) and print the snippet
-  --out <dir>           with --print: where head-snippet.html / the manifest go
+  --print               no page to edit (or you only want the snippet): write the manifest into --out
+                        (the folder served as the site root, e.g. public/) and head-snippet.html into the
+                        current folder (never into the deployed folder), and print the snippet
+  --out <dir>           with --print: where the manifest goes              (default: current folder)
+  --snippet <file>      with --print: where head-snippet.html goes         (default: ./head-snippet.html)
 Exit codes: 0 ok · 2 usage error · 3 page already wired (nothing changed; see message)
 """
 import hashlib
@@ -51,11 +53,11 @@ BLOCK_RE = re.compile(r"[ \t]*" + re.escape(START) + r".*?" + re.escape(END) + r
 def parse(argv):
     o = {"html": None, "icons_dir": None, "web_path": None, "name": None, "long_name": None, "theme": None,
          "bg": None, "start_url": None, "status_bar": None, "standalone": True, "manifest": "manifest.webmanifest",
-         "force": False, "print": False, "out": None}
+         "force": False, "print": False, "out": None, "snippet": None}
     flags = {"--no-standalone": ("standalone", False), "--force": ("force", True), "--print": ("print", True)}
     valued = {"--icons-dir": "icons_dir", "--web-path": "web_path", "--name": "name", "--long-name": "long_name",
               "--theme": "theme", "--bg": "bg", "--start-url": "start_url", "--status-bar": "status_bar",
-              "--manifest": "manifest", "--out": "out"}
+              "--manifest": "manifest", "--out": "out", "--snippet": "snippet"}
     i = 0
     while i < len(argv):
         a = argv[i]
@@ -264,12 +266,13 @@ def main(argv):
 
     if o["print"]:
         snippet = ['<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'] + lines
-        base_dir.mkdir(parents=True, exist_ok=True)
-        (base_dir / "head-snippet.html").write_text("\n".join(snippet) + "\n", encoding="utf-8")
+        snippet_path = Path(o["snippet"]).resolve() if o["snippet"] else Path.cwd() / "head-snippet.html"
+        snippet_path.parent.mkdir(parents=True, exist_ok=True)
+        snippet_path.write_text("\n".join(snippet) + "\n", encoding="utf-8")
         man_path.parent.mkdir(parents=True, exist_ok=True)
         man_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print("\n".join(snippet))
-        print(f"\ninject.py: wrote {base_dir / 'head-snippet.html'} and {man_path} "
+        print(f"\ninject.py: wrote {snippet_path} and {man_path} "
               f"(manifest href {manifest_href}; icons at {web}/)", file=sys.stderr)
         return 0
     if not html_path.exists():

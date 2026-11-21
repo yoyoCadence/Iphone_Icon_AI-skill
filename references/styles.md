@@ -6,10 +6,13 @@ enough to paste; rename ids you change. Numbers are starting points calibrated f
 their ratios when you scale.
 
 **Two rules that every snippet below already follows:**
-- *Filter regions cover the whole canvas* (`filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"`).
-  Percentage regions are measured on the shape's bounding box *without its stroke*, so they slice the
-  tips off stroked glyphs and box thin shapes' blurs into visible rectangles — and only at 1024, where
-  `preview.png` is too small to show it. Check `grid.png` / `icon-1024.png` for straight cut edges.
+- *Filter regions cover the canvas with a margin* (`filterUnits="userSpaceOnUse" x="-256" y="-256"
+  width="1536" height="1536"`). Percentage regions are measured on the shape's bounding box *without its
+  stroke*, so they slice the tips off stroked glyphs and box thin shapes' blurs into visible rectangles —
+  only visible at 1024, which is why `grid.png` exists. The region is in the *local* coordinates of the
+  element that uses the filter: the 256 px margin keeps it covering the tile inside groups rotated about
+  the centre or nudged a little, and stops full-tile blurs from fading at the edges. For a group moved
+  far off-centre, put the filter on an outer, untransformed group instead.
 - *Bold before beautiful.* Block the silhouette out in flat colours first and check it at 29pt among
   bright neighbours (`preview.png`); add material only once the flat version already wins. Refinement
   never rescues a subject that is too small or too pale.
@@ -44,14 +47,14 @@ Add a third mid-stop only to push saturation (gradients desaturate in the middle
 
 **Contact shadow (tinted, soft, downward).**
 ```xml
-<filter id="shadow" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+<filter id="shadow" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536">
   <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#0A1B6E" flood-opacity="0.45"/>
 </filter>
 ```
 
 **Inner shadow (gives a flat shape thickness; apply to the shape itself).**
 ```xml
-<filter id="inner" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+<filter id="inner" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536">
   <feOffset dx="-4" dy="-10"/><feGaussianBlur stdDeviation="12" result="ob"/>
   <feComposite operator="out" in="SourceGraphic" in2="ob" result="inv"/>
   <feFlood flood-color="#1A2A8C" flood-opacity="0.55" result="col"/>
@@ -74,22 +77,22 @@ a dent; if a shape looks sunken, flip the sign.
 
 **Specular highlight** (glossy materials only) — a blurred white ellipse near the top-left of the form:
 ```xml
-<filter id="soft" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="14"/></filter>
+<filter id="soft" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="14"/></filter>
 <ellipse cx="430" cy="380" rx="120" ry="60" fill="#fff" opacity="0.55" filter="url(#soft)" transform="rotate(-25 430 380)"/>
 ```
 
 **Outer glow** (luminous things) — duplicate the shape beneath itself, blurred, at lower opacity.
 Two blurs (tight + wide) look far better than one.
 ```xml
-<filter id="glowTight" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="14"/></filter>
-<filter id="glowWide" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="48"/></filter>
+<filter id="glowTight" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="14"/></filter>
+<filter id="glowWide" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="48"/></filter>
 <use href="#stroke" filter="url(#glowWide)"  opacity="0.55"/>
 <use href="#stroke" filter="url(#glowTight)" opacity="0.8"/>
 <use href="#stroke"/>
 ```
 
 **Grain** — removes plastic flatness; invisible at 60pt, felt at 1024. Costs bytes: noise does not
-compress, so it roughly doubles to quadruples PNG size (icon-512 ≈ 250 KB instead of ≈ 100 KB). Keep
+compress, so it roughly doubles to quadruples PNG size (icon-512 ≈ 250 KB; smooth gradients and big blurs alone already land around 150–250 KB). Keep
 alpha ≤ 0.08, and skip it for scenes that already have texture.
 ```xml
 <filter id="grain" x="0" y="0" width="100%" height="100%">
@@ -131,7 +134,7 @@ Build the object from three stacked copies of its silhouette:
   <stop offset="0" stop-color="#FFE39A"/><stop offset="0.55" stop-color="#F2B233"/><stop offset="1" stop-color="#B86A0A"/>
 </linearGradient>
 <!-- 2. ambient occlusion: dark ellipse under the object, heavily blurred -->
-<filter id="ao" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="30"/></filter>
+<filter id="ao" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="30"/></filter>
 <ellipse cx="512" cy="760" rx="260" ry="46" fill="#3A1C00" opacity="0.5" filter="url(#ao)"/>
 <!-- 3. body + inner shadow for thickness -->
 <circle cx="512" cy="500" r="270" fill="url(#body)" filter="url(#inner)"/>
@@ -156,7 +159,7 @@ makes it unique.
 
 ```xml
 <rect width="1024" height="1024" fill="#0F1430"/>                        <!-- deep base -->
-<filter id="blob" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="110"/></filter>
+<filter id="blob" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="110"/></filter>
 <circle cx="300" cy="300" r="260" fill="#FF6AC1" filter="url(#blob)" opacity="0.9"/>   <!-- 2–3 blobs -->
 <circle cx="720" cy="420" r="280" fill="#5B7BFF" filter="url(#blob)" opacity="0.9"/>
 <circle cx="520" cy="820" r="240" fill="#38E1C9" filter="url(#blob)" opacity="0.8"/>
@@ -182,7 +185,7 @@ shape overlapping the first gives the signature "stacked panes" look — stop at
 *Why it works:* layers imply content and order; shadows between layers provide depth without gloss.
 
 ```xml
-<filter id="paper" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+<filter id="paper" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536">
   <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#3B2B00" flood-opacity="0.25"/>
 </filter>
 <g transform="rotate(-6 512 512)">

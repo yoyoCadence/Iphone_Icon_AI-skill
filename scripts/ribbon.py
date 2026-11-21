@@ -19,6 +19,8 @@ Shape and colour:
   --taper A:B              round-ish taper: fraction of length over which the start/end narrow to 0
   --side front|back|all    spiral only: front = the half nearer the viewer (draw after the body it
                            orbits), back = the far half (draw before it). Default all
+  --range T0:T1            draw only this part of the length (0..1), e.g. 0.6:1 for the last 40%
+  --cap butt|round         end caps (default butt: cut square to the path)
   --samples N              resolution (default 360)
   --id NAME                id of the emitted <g> (default ribbon)
   --core "#hex:width:from" also emit a centreline <path> (e.g. a hot white core) from t=from to 1
@@ -153,7 +155,7 @@ def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__); return 0
     o = {"path": None, "spiral": None, "width": "8:40", "colors": "#ffffff@0,#ffffff@1", "taper": None,
-         "side": "all", "samples": 360, "id": "ribbon", "core": None}
+         "side": "all", "samples": 360, "id": "ribbon", "core": None, "range": "0:1", "cap": "butt"}
     i = 0
     while i < len(argv):
         k = argv[i]
@@ -189,11 +191,14 @@ def main(argv):
         L = math.hypot(dx, dy) or 1.0
         return (-dy / L, dx / L)
 
+    r0, r1 = (float(x) for x in o["range"].split(":"))
     out = [f'<g id="{o["id"]}">']
     step = 2
     for k0 in range(0, n, step):
         k1 = min(n, k0 + step + 1)
         mid = samples[(k0 + k1) // 2]
+        if not (r0 <= samples[k0][1] and samples[k1][1] <= r1 + 1e-9):
+            continue
         if o["side"] != "all":
             if mid[2] is None:
                 die("--side only applies to --spiral")
@@ -209,6 +214,10 @@ def main(argv):
         pts = left + right[::-1]
         d = "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in pts) + "Z"
         out.append(f'  <path d="{d}" fill="#%02x%02x%02x"/>' % colour_at(stops, mid[1]))
+    if o["cap"] == "round":
+        inside = [(p, t) for p, t, front in samples if r0 <= t <= r1 and (o["side"] == "all" or front == (o["side"] == "front"))]
+        for (x, y), t in (inside[:1] + inside[-1:]) if inside else []:
+            out.append(f'  <circle cx="{x:.1f}" cy="{y:.1f}" r="{width(t)/2:.1f}" fill="#%02x%02x%02x"/>' % colour_at(stops, t))
     out.append("</g>")
 
     if o["core"]:

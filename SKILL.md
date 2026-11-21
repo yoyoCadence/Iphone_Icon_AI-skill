@@ -37,12 +37,18 @@ The idea must pass three tests: readable at **29pt** from silhouette alone; **ow
 this be any app in the category?" must be *no*); **no collision** with a famous icon combo.
 Use `references/metaphors.md` for category twists and `references/palettes.md` for colours.
 Make **two** concepts only when the brief gives nothing beyond a category; otherwise make one and
-keep a runner-up sentence for the hand-off. The worked examples in `assets/examples/` calibrate
-quality — if the brief is in an example's category, that example is now the cliché to avoid.
+keep a runner-up sentence for the hand-off. If you are torn between concepts, block both out and
+judge them side by side with `render.js --compare a.svg b.svg`.
+
+The worked examples in `assets/examples/` calibrate quality. When a brief is in an example's
+category, don't reuse the example's *twist, palette or execution* — but keep the category's core sign
+(a prompt for a terminal, a coin or ledger for money) if legibility needs it; dropping it to be
+different trades away the 29pt read. If the user's real brand colours happen to match an example's,
+the brand wins: keep the colours and differ in object, composition or which colour is the tile.
 
 ### 3. Build the SVG — bold first, beautiful second
-1. **Block out** the silhouette in flat colours, render it (step 4), and check the 29pt tile among
-   the bright neighbours in `preview.png`. Solid subjects usually cover ~28–45 % of the tile
+1. **Block out** the silhouette in flat colours, render it with `--draft` (step 4; previews only,
+   deployable PNGs untouched), and check the 29pt tile among the bright neighbours in `preview.png`. Solid subjects usually cover ~28–45 % of the tile
    (`validate.py` reports coverage); line/glow glyphs can be thinner if contrast is ≥ 4:1.
    Refinement never rescues a subject that is too small or too pale — fix that here.
 2. **Then add material** with the recipe for the chosen style in `references/styles.md`.
@@ -56,31 +62,40 @@ Rules that come from how iOS and SVG behave — not stylistic preferences:
 - Main subject inside the centre ~62 % (x,y ≈ 195…830); corners carry only background.
 - Glyph strokes ≥ 28 px, gaps ≥ 24 px at 1024; text only for a monogram (≤ 2 letters, weight ≥ 700).
 - One light source (top-left unless the scene has its own sun); tinted shadows, never black.
-- Filter regions cover the canvas: `filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"`.
+- Filter regions cover the canvas: `filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"`.
   Percentage regions clip stroked and thin shapes into hard edges.
 - Colour discipline: two hues in the tile, one hero object/glyph, at most one secondary accent.
 
 ### 4. Render → look → critique → revise
 ```bash
-node  scripts/render.js  icon.svg --out icons --preview-dir icon-design --label "Name" --grid
-python3 scripts/validate.py icons/icon-1024.png
+node  scripts/render.js  icon.svg --out icons --preview-dir icon-design --label "Name" --grid   # add --draft for block-outs
+python3 scripts/validate.py icon-design/icon-1024.png
 ```
 **Read `icon-design/preview.png`** (renders as an image) and go through `references/critique.md`
 in order: 29pt test → neighbour test → ownership → scale/centre → light/material → restraint.
 Then open `icon-design/grid.png` (1024) for what the small sheet hides: clipped blurs, sliced tips,
-banding, stray seams. Fix the top two findings, re-render, look again. Expect one or two revisions;
-a fifth means the concept is wrong — go back to step 2. `validate.py` gives mechanical facts
+banding, stray seams. Fix the top two findings, re-render, look again. Block-outs and side-by-side
+comparisons don't count as rounds; expect one to three material rounds after the block-out, and small
+local fixes are fine. If the *concept* had to change twice, go back to step 2. `validate.py` gives mechanical facts
 (transparency, coverage, centre of mass, contrast, corner intrusion); your eyes judge the rest.
 
 ### 5. Deliver
 - **Page without icon wiring:** `python3 scripts/inject.py index.html --name "Name" --bg "#tile-bottom"`.
   It keeps the page's own `theme-color`, status-bar and web-app choices unless you pass the matching
-  option (`--theme` = the brand colour for a page that has none), uses URLs relative to the page
-  (sub-path hosting such as GitHub Pages works), writes or updates the manifest, and cache-busts.
+  option (`--theme` = the brand colour for a page that has none), writes or updates the manifest, and
+  cache-busts.
+- **Pick the URL style by how the site is served:** all pages in one folder (plain HTML, GitHub Pages
+  project site) → the default relative URLs; a single-page app with nested routes (`/spot/123`) at the
+  domain root → `--web-path /icons`; such an app under a sub-path → `--web-path /<base>/icons`. Relative
+  URLs break on nested routes; root-absolute ones break under a sub-path. State the assumption.
 - **Page already wired:** `inject.py` refuses and prints the paths in use — render to those paths
   (or run the project's own build) instead of rewiring. `--force` only on explicit request.
-- **No HTML yet:** `inject.py --print --out <dir> --name … --theme … [--web-path /icons]` writes
-  `head-snippet.html` and the manifest there and prints the snippet.
+- **No HTML yet:** `inject.py --print --out <site-root> --name … --theme … [--web-path /icons]` writes the
+  manifest into the site root (e.g. `public/`), `head-snippet.html` into the current folder (not
+  deployed), and prints the snippet.
+- **Dark apps:** pass `--status-bar black`; the default (`default`) gives a light status bar that looks
+  wrong above a dark UI. `black-translucent` draws the page under the status bar and needs
+  `env(safe-area-inset-top)` padding.
 - **Build-tool layouts** (`public/` in Vite/Next): render with `--out public/icons --preview-dir
   icon-design` so previews are not deployed; web paths then start at `/icons/`.
 - **Service worker present:** a cache-first worker keeps serving the old PNG at the same URL — bump
@@ -95,12 +110,13 @@ runner-up concept in one line.
 ```
 <project>/
 ├── icon.svg                 ← editable master, keep it
-├── icons/                   ← deployable: icon-1024/512/192.png, apple-touch-icon.png (180), icon.svg
-├── icon-design/             ← not deployed: preview.png, grid.png
+├── icons/                   ← deployable: icon-512/192.png, apple-touch-icon.png (180), icon.svg
+├── icon-design/             ← not deployed: icon-1024.png (master), preview.png, grid.png, compare.png
 ├── manifest.webmanifest
 └── index.html               ← <head> block injected (or the project's existing wiring, untouched)
 ```
-No project? Create `./<app-slug>-icon/` with the same layout.
+No project files yet? If the current folder is the user's (empty) project folder, use it directly;
+create `./<app-slug>-icon/` only when the current folder is unrelated.
 
 ## Quality bar (what "done" means)
 - The 29pt tile is nameable and holds its own next to the bright neighbours on both wallpapers.
@@ -123,10 +139,11 @@ No project? Create `./<app-slug>-icon/` with the same layout.
 ## Scripts
 | Script | Does |
 |---|---|
-| `scripts/render.js <svg> --out <dir> [--preview-dir <dir>] --label <name> [--grid] [--sizes 167,152]` | SVG → PNG set + home-screen preview among bright neighbours (Playwright/Chromium); warns on heavy files |
+| `scripts/render.js <svg> --out <dir> [--preview-dir <dir>] [--draft] --label <name> [--grid] [--sizes 167,152]` | SVG → PNG set + home-screen preview among bright neighbours (Playwright/Chromium); `--draft` for block-outs; warns on heavy files |
+| `scripts/render.js --compare a.svg b.svg [c.svg d.svg] --out icon-design` | variants side by side at hero, 60pt and 29pt among bright neighbours |
 | `scripts/validate.py <png> [--json]` | transparency, subject coverage, centre of mass, corner & maskable intrusion, contrast, tonal depth; scene-aware |
-| `scripts/inject.py <html> --name [--theme --bg --start-url --status-bar --no-standalone --force --print --out]` | head tags + manifest; refuses to rewire an already-wired page; relative URLs; idempotent |
-| `scripts/ribbon.py --path/--spiral … --width A:B --colors …` | variable-width, colour-graded strokes (trails, orbits, brush strokes) as seamless SVG |
+| `scripts/inject.py <html> --name [--theme --bg --web-path --start-url --status-bar --no-standalone --force --print --out --snippet]` | head tags + manifest; refuses to rewire an already-wired page; relative URLs by default; idempotent |
+| `scripts/ribbon.py --path/--spiral … --width A:B --colors … [--range T0:T1 --cap round --side front\|back]` | variable-width, colour-graded strokes (trails, orbits, brush strokes) as seamless SVG |
 | `scripts/extract_brand.py <html/css…>` | title, colours, fonts, copy, existing icon wiring |
 
 ## When the environment cannot render

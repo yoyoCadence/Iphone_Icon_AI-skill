@@ -6,11 +6,12 @@
  *
  * Usage:
  *   node render.js <icon.svg> [--out <dir>] [--label "App name"] [--sizes 1024,512,192,180]
- *                             [--no-preview] [--grid] [--preview-dir <dir>] [--quiet]
+ *                             [--no-preview] [--grid] [--preview-dir <dir>] [--draft] [--quiet]
+ *   node render.js --compare a.svg b.svg [c.svg …] [--out <dir>] [--label "App name"]
  *
  * Outputs (in --out, default: ./icons next to the SVG):
  *   icon.svg               copy of the source (kept so the HTML can also link an SVG favicon)
- *   icon-1024.png          master (App Store / source of truth)
+ *   icon-1024.png          master — in --preview-dir when given (it is a design file, nothing links it)
  *   apple-touch-icon.png   180×180 — what iOS puts on the home screen
  *   icon-512.png           manifest (Android / desktop PWA; also used as "maskable")
  *   icon-192.png           manifest
@@ -36,8 +37,12 @@ const HELP = `render.js — render an icon SVG to iPhone/PWA PNG sizes + a home-
   --sizes <list>     comma list of extra PNG sizes (default adds none beyond 1024,512,192,180)
   --no-preview       skip preview.png
   --grid             also write grid.png (icon with the layout grid overlaid)
-  --preview-dir <d>  write preview.png / grid.png here instead of --out (keep them out of a
-                     deployed folder such as public/icons)
+  --preview-dir <d>  write icon-1024.png, preview.png and grid.png here instead of --out
+                     (keeps design files out of a deployed folder such as public/icons)
+  --draft            block-out / work-in-progress: render only icon-1024 + preview (+grid) into the
+                     preview dir and leave the deployable PNGs in --out untouched
+  --compare a b …    render 2–4 SVG variants side by side (hero + 60/29pt among bright neighbours,
+                     both wallpapers) into <out>/compare.png — for choosing between concepts
   --quiet            less logging
 `;
 
@@ -62,10 +67,14 @@ function die(msg) {
 }
 
 function parseArgs(argv) {
-  const args = { svg: null, out: null, label: 'App', sizes: [], preview: true, grid: false, quiet: false, previewDir: null };
+  const args = { svg: null, out: null, label: 'App', sizes: [], preview: true, grid: false, quiet: false, previewDir: null,
+    draft: false, compare: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
+    if (a === '--compare') { args.compare = []; continue; }
+    if (args.compare && !a.startsWith('-')) { args.compare.push(a); continue; }
     if (a === '--out' || a === '-o') args.out = argv[++i];
+    else if (a === '--draft') args.draft = true;
     else if (a === '--label') args.label = argv[++i];
     else if (a === '--sizes') args.sizes = String(argv[++i]).split(',').map((s) => parseInt(s, 10)).filter((n) => n > 0);
     else if (a === '--no-preview') args.preview = false;
@@ -77,9 +86,16 @@ function parseArgs(argv) {
     else if (!args.svg) args.svg = a;
     else die(`unexpected argument ${a}`);
   }
+  if (args.compare) {
+    if (args.compare.length < 2 || args.compare.length > 4) die('--compare takes 2–4 SVG files');
+    for (const f of args.compare) if (!fs.existsSync(f)) die(`no such file: ${f}`);
+    if (!args.out) args.out = path.join(path.dirname(path.resolve(args.compare[0])), 'icon-design');
+    return args;
+  }
   if (!args.svg) die(`missing <icon.svg>\n${HELP}`);
   if (!fs.existsSync(args.svg)) die(`no such file: ${args.svg}`);
   if (!args.out) args.out = path.join(path.dirname(path.resolve(args.svg)), 'icons');
+  if (args.draft && !args.previewDir) args.previewDir = path.join(path.dirname(path.resolve(args.out)), 'icon-design');
   return args;
 }
 
@@ -236,6 +252,55 @@ function previewHtml(pngDataUrl, label) {
   </body></html>`;
 }
 
+async function svgToDataUrl(browser, svgText, size) {
+  const page = await browser.newPage({ viewport: { width: size, height: size }, deviceScaleFactor: 1 });
+  await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}
+    svg{display:block;width:${size}px;height:${size}px}</style></head><body>${svgText}</body></html>`, { waitUntil: 'load' });
+  await page.waitForTimeout(50);
+  const buf = await page.screenshot({ omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
+  await page.close();
+  return 'data:image/png;base64,' + buf.toString('base64');
+}
+
+async function renderCompare(browser, files, label, file) {
+  const variants = [];
+  // label each variant with the shortest path suffix that tells it apart from the others
+  const parts = files.map((f) => path.resolve(f).split(path.sep).filter(Boolean));
+  const labelOf = (i) => {
+    for (let k = 1; k <= parts[i].length; k++) {
+      const tail = parts[i].slice(-k).join('/');
+      if (parts.every((q, j) => j === i || q.slice(-k).join('/') !== tail)) {
+        const p = parts[i];
+        return k <= 2 ? tail : `${p[p.length - k]}/…/${p[p.length - 1]}`;   // the folder that differs + file name
+      }
+    }
+    return parts[i].join('/');
+  };
+  for (const [i, f] of files.entries()) {
+    const shown = labelOf(i);
+    variants.push({ name: `${String.fromCharCode(65 + i)} · ${shown}`, url: await svgToDataUrl(browser, normalizeSvg(fs.readFileSync(f, 'utf8')), 512) });
+  }
+  const tile = (url, px) => `<div class="i sq" style="width:${px}px;height:${px}px"><img src="${url}"></div>`;
+  const nb = (bg, glyph) => `<div class="i sq" style="width:104px;height:104px;background:${bg}"><svg viewBox="0 0 120 120" width="100%" height="100%">${glyph}</svg></div>`;
+  const ring = '<circle cx="60" cy="60" r="30" fill="none" stroke="#fff" stroke-width="13"/>';
+  const bolt = '<path d="M66 22 L36 66 H58 L52 98 L84 52 H62 Z" fill="#fff"/>';
+  const col = (v) => `<div class="col"><div class="h">${tile(v.url, 300)}</div><div class="n">${v.name}</div>
+    <div class="p dark">${nb('linear-gradient(180deg,#0a84ff,#0056d6)', ring)}${tile(v.url, 104)}${nb('linear-gradient(180deg,#ff9f0a,#e8590c)', bolt)}</div>
+    <div class="p light">${nb('linear-gradient(180deg,#34c759,#1f9a3e)', ring)}${tile(v.url, 104)}${tile(v.url, 58)}${tile(v.url, 40)}</div></div>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><style>
+  body{margin:0;background:#0e0e11;font-family:-apple-system,"SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;color:#fff}
+  .w{display:flex;gap:28px;padding:30px}.col{display:flex;flex-direction:column;align-items:center;gap:16px;width:380px}
+  .sq{clip-path:url(#squircle)}.i{overflow:hidden;flex:none}.i img{width:100%;height:100%;display:block}
+  .n{font-size:20px;color:#cfd0d6}.p{display:flex;gap:18px;align-items:center;justify-content:center;width:380px;height:170px;border-radius:22px}
+  .dark{background:radial-gradient(circle at 25% 15%,#3d3f7a 0%,#1b1c33 45%,#0d0e1b 100%)}.light{background:linear-gradient(160deg,#fbe3d3 0%,#e9e3f5 50%,#d3e2fb 100%)}
+  </style></head><body><svg width="0" height="0" style="position:absolute"><defs><clipPath id="squircle" clipPathUnits="objectBoundingBox"><path d="${SQUIRCLE}"/></clipPath></defs></svg>
+  <div class="w">${variants.map(col).join('')}</div></body></html>`;
+  const page = await browser.newPage({ viewport: { width: 60 + variants.length * 408, height: 800 }, deviceScaleFactor: 1 });
+  await page.setContent(html, { waitUntil: 'load' });
+  await page.screenshot({ path: file, fullPage: true });
+  await page.close();
+}
+
 async function renderPreview(browser, masterPng, label, file) {
   const dataUrl = 'data:image/png;base64,' + fs.readFileSync(masterPng).toString('base64');
   const page = await browser.newPage({ viewport: { width: 1800, height: 1000 }, deviceScaleFactor: 1 });
@@ -272,28 +337,42 @@ function fallbackRender(svgPath, size, file) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const log = (...a) => { if (!args.quiet) console.log(...a); };
+  if (args.compare) {
+    const pw = loadPlaywright();
+    if (!pw) die('--compare needs Playwright (npm i -D playwright && npx playwright install chromium)');
+    fs.mkdirSync(args.out, { recursive: true });
+    const browser = await launchBrowser(pw);
+    try { await renderCompare(browser, args.compare, args.label, path.join(args.out, 'compare.png')); } finally { await browser.close(); }
+    log(`  compare.png  (${args.compare.length} variants) → ${args.out}`);
+    return;
+  }
   const raw = fs.readFileSync(args.svg, 'utf8');
   const svgText = normalizeSvg(raw);
-  fs.mkdirSync(args.out, { recursive: true });
-  fs.writeFileSync(path.join(args.out, 'icon.svg'), raw);
-
+  const pdir = args.previewDir || args.out;
+  fs.mkdirSync(pdir, { recursive: true });
+  if (!args.draft) {
+    fs.mkdirSync(args.out, { recursive: true });
+    fs.writeFileSync(path.join(args.out, 'icon.svg'), raw);
+  }
   const plan = [
-    { size: 1024, name: 'icon-1024.png' },
-    { size: 512, name: 'icon-512.png' },
-    { size: 192, name: 'icon-192.png' },
-    { size: 180, name: 'apple-touch-icon.png' },
-    ...args.sizes.filter((s) => ![1024, 512, 192, 180].includes(s)).map((s) => ({ size: s, name: `icon-${s}.png` })),
-  ];
+    { size: 1024, name: 'icon-1024.png', dir: pdir },
+    ...(args.draft ? [] : [
+      { size: 512, name: 'icon-512.png' },
+      { size: 192, name: 'icon-192.png' },
+      { size: 180, name: 'apple-touch-icon.png' },
+      ...args.sizes.filter((s) => ![1024, 512, 192, 180].includes(s)).map((s) => ({ size: s, name: `icon-${s}.png` })),
+    ]),
+  ].map((p) => ({ ...p, dir: p.dir || args.out }));
 
   const pw = loadPlaywright();
   if (!pw) {
     console.warn('render.js: Playwright not found — using fallback renderer (filters may look wrong).');
     console.warn('           For full fidelity: npm i -D playwright && npx playwright install chromium');
-    const tmpSvg = path.join(args.out, '.normalized.svg');
+    const tmpSvg = path.join(pdir, '.normalized.svg');
     fs.writeFileSync(tmpSvg, svgText.replace(/<svg\b/i, '<svg width="1024" height="1024"'));
     let used = null;
     for (const p of plan) {
-      used = fallbackRender(tmpSvg, p.size, path.join(args.out, p.name));
+      used = fallbackRender(tmpSvg, p.size, path.join(p.dir, p.name));
       if (!used) die('no renderer available. Install Playwright (npm i -D playwright && npx playwright install chromium) or rsvg-convert.');
       log(`  ${p.name}  (${p.size}×${p.size}, via ${used})`);
     }
@@ -305,13 +384,11 @@ async function main() {
   const browser = await launchBrowser(pw);
   try {
     for (const p of plan) {
-      const file = path.join(args.out, p.name);
+      const file = path.join(p.dir, p.name);
       await renderSize(browser, svgText, p.size, file);
-      log(`  ${p.name}  (${p.size}×${p.size})`);
+      log(`  ${path.relative(process.cwd(), file) || p.name}  (${p.size}×${p.size})`);
     }
-    const master = path.join(args.out, 'icon-1024.png');
-    const pdir = args.previewDir || args.out;
-    fs.mkdirSync(pdir, { recursive: true });
+    const master = path.join(pdir, 'icon-1024.png');
     if (args.preview) {
       const file = path.join(pdir, 'preview.png');
       await renderPreview(browser, master, args.label, file);
@@ -335,7 +412,8 @@ async function main() {
   const heavy = [['apple-touch-icon.png', 100], ['icon-192.png', 100], ['icon-512.png', 300]]
     .filter(([f, lim]) => kb(f) > lim).map(([f, lim]) => `${f} ${kb(f).toFixed(0)} KB (> ${lim})`);
   if (heavy.length) console.warn(`render.js: heavy files: ${heavy.join(', ')} — usually film grain; lower its alpha or drop it`);
-  log(`done → ${args.out}${args.previewDir ? `  (preview in ${args.previewDir})` : ''}`);
+  if (args.draft) log(`draft → ${pdir} (deployable PNGs in ${args.out} untouched)`);
+  else log(`done → ${args.out}${args.previewDir ? `  (master + previews in ${args.previewDir})` : ''}`);
 }
 
 main().catch((e) => { console.error(`render.js: ${e.message}`); process.exit(1); });

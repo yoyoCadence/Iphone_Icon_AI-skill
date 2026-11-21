@@ -89,43 +89,9 @@ Name:        "Bramble" (7 chars)
 ```
 (This category is deliberately not one of `assets/examples/` — never copy an example's concept.)
 
-## 4. Build the SVG
+## 4–6. Build, render and critique, deliver
 
-Block out the silhouette in flat colours first and check it at 29pt among the bright neighbours of
-`preview.png`; add material only when the flat version already reads. Styles A/B/E/F start from
-`assets/scaffold.svg` (1024 viewBox, lighting rig pre-wired); C/D/G start from their recipe in
-`styles.md`. Variable-width or colour-graded strokes come from `scripts/ribbon.py`.
-Non-negotiables that come from how iOS and SVG treat the file:
-
-- Full-bleed opaque square. No rounded corners, no transparent margin, no drop shadow around the
-  tile — iOS masks and shades the tile itself; anything you add gets doubled or cropped.
-- Main glyph within the centre ~62% (x,y ≈ 195…830 at 1024); nothing meaningful within 10% of the
-  edge. Corners carry only background.
-- Minimum stroke ≈ 28px at 1024 (≈ 5px at 180); minimum gap between shapes ≈ 24px.
-- Glyph drawn as paths. Text only for a monogram, with a font stack
-  (`-apple-system, "SF Pro Display", Inter, "Helvetica Neue", Arial, sans-serif`) and weight ≥ 700.
-- Filter regions cover the canvas (`filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"`);
-  percentage regions are measured without the stroke and slice stroked or thin shapes.
-
-## 5. Render, look, critique, revise (at least once)
-
-```bash
-node scripts/render.js icon.svg --out icons --preview-dir icon-design --label "Name" --grid
-python3 scripts/validate.py icons/icon-1024.png
-```
-
-Then open `icon-design/preview.png` with the image viewer you have (the `Read` tool renders PNGs) and
-go through `critique.md`; finish with `icon-design/grid.png` at 1024 for clipping and seams. First drafts are reliably off in the same places: glyph 10–15% too small,
-light slightly inconsistent, gradient a touch muddy, visual centre low. Fix the top two issues,
-re-render, look again. Two rounds is normal; stop when the 60pt tile reads instantly *and* the
-1024 hero still looks designed rather than assembled.
-
-## 6. Deliver
-
-`python3 scripts/inject.py index.html --name "Name" --bg "#tile-bottom"` wires the tags and writes the
-manifest, keeping the page's own theme-color (pass `--theme` only when it has none). A page that is
-already wired is left alone — render to its paths or run the project's icon build instead
-(`ios-delivery.md` explains every tag, service-worker caching and the on-device test). Show the user the preview,
-state what the icon depicts and why, and name the one assumption they are most likely to want to
-change (usually tone or colour). Offer the runner-up concept in one sentence — it costs nothing and
-often converts.
+These steps live in `SKILL.md` (steps 3–5) with the exact commands; the recipes are in `styles.md`,
+the critique order in `critique.md`, the delivery details in `ios-delivery.md`. Two reminders that
+matter most here: block out the silhouette flat before adding material, and stop polishing when the
+29pt tile reads instantly among bright neighbours and the 1024 hero shows one consistent light.

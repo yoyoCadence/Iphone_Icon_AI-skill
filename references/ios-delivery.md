@@ -29,12 +29,19 @@ manifest, until the worker's cache name changes. If the project has a worker, bu
 worker precaches an explicit list of icon URLs, a `?v=` query makes those entries miss — update the
 list or rely on the version bump instead of the query.
 
-## URLs: relative unless you know the site root
+## URLs: choose by how the site is served
 
-Root-absolute paths (`/icons/…`) break when the site lives under a sub-path (GitHub Pages serves
-`https://user.github.io/<repo>/`). `inject.py` therefore writes paths relative to the page
-(`icons/apple-touch-icon.png`). Use `--web-path /icons` only when the app is served from the domain
-root — typically build-tool layouts where `public/` is the root (Vite, Next, CRA).
+iOS reads the `apple-touch-icon` from whatever page the user is on when they tap *Add to Home Screen*,
+so the href must resolve from every page:
+
+| Site | Use | Breaks if you use the other |
+|---|---|---|
+| all pages in one folder (plain HTML, GitHub Pages project site `user.github.io/<repo>/`) | relative `icons/…` (inject.py default) | `/icons/…` 404s under `/<repo>/` |
+| single-page app with nested routes (`/spot/123`) served at the domain root (Vite, Next, CRA `public/`) | `--web-path /icons` | `icons/…` resolves to `/spot/icons/…` |
+| single-page app with nested routes under a sub-path | `--web-path /<base>/icons` | both of the above |
+
+When there is no code yet, pick the most likely row, say which one you assumed, and give the one-line
+change for the other case.
 
 ## The name under the icon
 
@@ -52,6 +59,7 @@ short brand name; never a slogan.
 Launching from the home screen hides Safari's address bar and navigation. Consequences:
 - the page must provide its own back/close affordances; no browser back button;
 - links to other origins open in an in-app browser sheet; same-origin navigation stays inside;
+- `default` is a light status bar with dark text — wrong above a dark UI; dark apps use `black`;
 - the status bar overlays the page with `black-translucent`; use
   `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`
   and `padding-top: env(safe-area-inset-top)` on the header;

@@ -63,7 +63,7 @@ by surviving the 29pt test; otherwise delete it. Grain/sheen must be invisible a
 | muddy gradient | mid-stop; shift top toward yellow, bottom toward blue/violet |
 | glyph too small / timid | scale group about (512,512) by 1.12–1.2; a pale subject also needs a darker tile behind it |
 | looks fine alone, weak next to the neighbours | bigger silhouette, one stronger value contrast, fewer mid-tones |
-| straight cut edge on a glow / sliced tip (grid.png) | filter region too small — use `filterUnits="userSpaceOnUse"` full canvas |
+| straight cut edge on a glow / sliced tip (grid.png) | filter region too small or shifted by a transform — use the padded region from styles.md, on an untransformed group |
 | a raised shape looks dented | inner-shadow offset points away from the light — flip its sign |
 | arrow/wedge looks off-centre | translate 2–3% toward the mass |
 | smears at 29pt | thicken strokes ≥ 28px, drop the smallest element, raise contrast |
