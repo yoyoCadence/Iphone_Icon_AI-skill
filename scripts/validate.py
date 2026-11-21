@@ -165,7 +165,7 @@ def analyse(path: Path):
             findings.append(("ok", f"subject coverage {coverage*100:.0f}% (background texture inflates this for scenes; "
                                    "judge the focal shape by eye)"))
         else:
-            findings.append(("warn" if coverage < 0.10 or coverage > 0.7 else "ok", note))
+            pending_coverage = (coverage, note)   # judged after contrast: thin glyphs are fine when crisp
         off = math.hypot(cx - 0.5, cy - 0.5)
         if scene:
             findings.append(("ok", f"focal mass at (cx={cx:.2f}, cy={cy:.2f}) — scenes may compose off-centre; keep the focal shape "
@@ -228,6 +228,13 @@ def analyse(path: Path):
                 findings.append(("ok", f"main tonal contrast {cr:.1f}:1 (acceptable; ≥3:1 is safer on busy wallpapers)"))
             else:
                 findings.append(("ok", f"main tonal contrast {cr:.1f}:1"))
+
+    if "pending_coverage" in locals():
+        cov, note = pending_coverage
+        cr = metrics.get("glyph_contrast", 0)
+        weak = cov > 0.7 or cov < 0.05 or (cov < 0.10 and cr < 4.0)
+        findings.append(("warn" if weak else "ok", note if weak or cov >= 0.10 else
+                         f"subject covers {cov*100:.0f}% — thin, but contrast {cr:.1f}:1 keeps a line/glow glyph legible"))
 
     # --- colour richness ----------------------------------------------------------------------
     pal = work.convert("P", palette=Image.ADAPTIVE, colors=64)

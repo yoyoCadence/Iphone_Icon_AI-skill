@@ -18,7 +18,7 @@ at home-screen size. Test cases live in `evals/` in the `claude plugin eval` lay
 |---|---|---|
 | Assertion pass rate, with skill | 100 % | 100 % (16/16) |
 | Assertion pass rate, without skill | 78 % | 89 % (14/16; assertions reworded to be layout-agnostic) |
-| Visual verdict vs. baseline | **won 1, mixed 1, lost 1** | **won 2 (小帳本, Swell), mixed 1 (Shellf)** |
+| Visual verdict vs. baseline | **won 1, mixed 1, lost 1** | **won 2 (小帳本, Swell), mixed 1 (Shellf)** → Shellf fixed in a targeted iteration 3 |
 | Tokens / time per with-skill run | ~171 k / ~9 min | ~185 k / ~9.5 min |
 
 Assertions saturate quickly — the baseline model is already competent at delivery — so the visual
@@ -36,6 +36,12 @@ comparison is the signal that matters. What changed between iterations, and why:
   29pt — caused by an over-strong anti-anchoring rule that pushed the agent away from the terminal's
   core sign. Fix: keep the category's core sign when legibility needs it; avoid only the example's
   twist, palette and execution.
+- **Iteration 3 (targeted, Shellf only — the one case still mixed):** the prompt `>_` came back,
+  with the shell→shelf twist kept in the cursor drawn as an amber 3D shelf. It reads as a terminal
+  at 29pt again, as instantly as the baseline, with an ownable detail the baseline lacks. Only this
+  case was rerun: the other two were already fixed, and a full round costs ~550 k tokens.
+
+![Shellf: iteration 1, 2, 3, baseline — rendered with render.js --compare](shellf-iterations.png)
 
 ## Bugs found by the test agents (all fixed)
 
