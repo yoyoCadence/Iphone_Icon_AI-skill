@@ -148,6 +148,17 @@ async function launchBrowser(pw) {
   }
 }
 
+/** page.screenshot with retries: under load (several renders at once) Chromium sometimes
+ *  answers "Unable to capture screenshot"; a short wait and a second attempt succeeds. */
+async function shot(page, opts, tries = 3) {
+  for (let i = 1; ; i++) {
+    try { return await page.screenshot(opts); } catch (e) {
+      if (i >= tries || !/capture screenshot|Target closed|timeout/i.test(String(e && e.message))) throw e;
+      await page.waitForTimeout(250 * i);
+    }
+  }
+}
+
 async function renderSize(browser, svgText, size, file) {
   const page = await browser.newPage({ viewport: { width: size, height: size }, deviceScaleFactor: 1 });
   const html = `<!doctype html><html><head><meta charset="utf-8"><style>
@@ -157,7 +168,7 @@ async function renderSize(browser, svgText, size, file) {
   await page.setContent(html, { waitUntil: 'load' });
   await page.evaluate(() => document.fonts && document.fonts.ready);
   await page.waitForTimeout(50);
-  await page.screenshot({ path: file, omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
+  await shot(page, { path: file, omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
   await page.close();
 }
 
@@ -257,7 +268,7 @@ async function svgToDataUrl(browser, svgText, size) {
   await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}
     svg{display:block;width:${size}px;height:${size}px}</style></head><body>${svgText}</body></html>`, { waitUntil: 'load' });
   await page.waitForTimeout(50);
-  const buf = await page.screenshot({ omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
+  const buf = await shot(page, { omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
   await page.close();
   return 'data:image/png;base64,' + buf.toString('base64');
 }
@@ -297,7 +308,7 @@ async function renderCompare(browser, files, label, file) {
   <div class="w">${variants.map(col).join('')}</div></body></html>`;
   const page = await browser.newPage({ viewport: { width: 60 + variants.length * 408, height: 800 }, deviceScaleFactor: 1 });
   await page.setContent(html, { waitUntil: 'load' });
-  await page.screenshot({ path: file, fullPage: true });
+  await shot(page, { path: file, fullPage: true });
   await page.close();
 }
 
@@ -307,7 +318,7 @@ async function renderPreview(browser, masterPng, label, file) {
   await page.setContent(previewHtml(dataUrl, label), { waitUntil: 'load' });
   await page.evaluate(() => document.fonts && document.fonts.ready);
   await page.waitForTimeout(80);
-  await page.screenshot({ path: file, fullPage: true });
+  await shot(page, { path: file, fullPage: true });
   await page.close();
 }
 
@@ -318,7 +329,7 @@ async function renderGrid(browser, masterPng, gridSvgPath, file) {
   await page.setContent(`<!doctype html><html><head><style>html,body{margin:0}
     .w{position:relative;width:1024px;height:1024px}.w img,.w svg{position:absolute;inset:0;width:1024px;height:1024px}</style></head>
     <body><div class="w"><img src="${dataUrl}">${grid}</div></body></html>`, { waitUntil: 'load' });
-  await page.screenshot({ path: file, clip: { x: 0, y: 0, width: 1024, height: 1024 } });
+  await shot(page, { path: file, clip: { x: 0, y: 0, width: 1024, height: 1024 } });
   await page.close();
 }
 
