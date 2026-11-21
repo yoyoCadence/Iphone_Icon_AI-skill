@@ -6,7 +6,7 @@
  *
  * Usage:
  *   node render.js <icon.svg> [--out <dir>] [--label "App name"] [--sizes 1024,512,192,180]
- *                             [--no-preview] [--grid] [--quiet]
+ *                             [--no-preview] [--grid] [--preview-dir <dir>] [--quiet]
  *
  * Outputs (in --out, default: ./icons next to the SVG):
  *   icon.svg               copy of the source (kept so the HTML can also link an SVG favicon)
@@ -36,6 +36,8 @@ const HELP = `render.js — render an icon SVG to iPhone/PWA PNG sizes + a home-
   --sizes <list>     comma list of extra PNG sizes (default adds none beyond 1024,512,192,180)
   --no-preview       skip preview.png
   --grid             also write grid.png (icon with the layout grid overlaid)
+  --preview-dir <d>  write preview.png / grid.png here instead of --out (keep them out of a
+                     deployed folder such as public/icons)
   --quiet            less logging
 `;
 
@@ -60,7 +62,7 @@ function die(msg) {
 }
 
 function parseArgs(argv) {
-  const args = { svg: null, out: null, label: 'App', sizes: [], preview: true, grid: false, quiet: false };
+  const args = { svg: null, out: null, label: 'App', sizes: [], preview: true, grid: false, quiet: false, previewDir: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--out' || a === '-o') args.out = argv[++i];
@@ -68,6 +70,7 @@ function parseArgs(argv) {
     else if (a === '--sizes') args.sizes = String(argv[++i]).split(',').map((s) => parseInt(s, 10)).filter((n) => n > 0);
     else if (a === '--no-preview') args.preview = false;
     else if (a === '--grid') args.grid = true;
+    else if (a === '--preview-dir') args.previewDir = argv[++i];
     else if (a === '--quiet') args.quiet = true;
     else if (a === '--help' || a === '-h') { console.log(HELP); process.exit(0); }
     else if (a.startsWith('-')) die(`unknown option ${a}\n${HELP}`);
@@ -143,14 +146,26 @@ async function renderSize(browser, svgText, size, file) {
 }
 
 function previewHtml(pngDataUrl, label) {
-  const placeholderPalettes = [
-    ['#5b6b8a', '#3b4660'], ['#8a6f5b', '#5e4a3a'], ['#5b8a7a', '#3a5e52'], ['#7a5b8a', '#4f3a5e'],
-    ['#8a5b5b', '#5e3a3a'], ['#5b7a8a', '#3a4f5e'], ['#8a8a5b', '#5e5e3a'],
+  // Neighbours look like a real home screen: saturated tiles, bold white glyphs. Muted grey
+  // placeholders flatter a timid icon; these don't. Generic shapes only — no real app's icon.
+  const G = {
+    ring: '<circle cx="60" cy="60" r="30" fill="none" stroke="#fff" stroke-width="13"/>',
+    bars: '<rect x="30" y="34" width="60" height="12" rx="6" fill="#fff"/><rect x="30" y="54" width="60" height="12" rx="6" fill="#fff"/><rect x="30" y="74" width="40" height="12" rx="6" fill="#fff"/>',
+    drop: '<path d="M60 26 C76 48 84 60 84 72 A24 24 0 0 1 36 72 C36 60 44 48 60 26Z" fill="#fff"/>',
+    grid: '<rect x="30" y="30" width="26" height="26" rx="7" fill="#fff"/><rect x="64" y="30" width="26" height="26" rx="7" fill="#fff" opacity=".7"/><rect x="30" y="64" width="26" height="26" rx="7" fill="#fff" opacity=".7"/><rect x="64" y="64" width="26" height="26" rx="7" fill="#fff"/>',
+    bolt: '<path d="M66 22 L36 66 H58 L52 98 L84 52 H62 Z" fill="#fff"/>',
+    dot: '<circle cx="60" cy="60" r="26" fill="#fff"/><circle cx="60" cy="60" r="11" fill="#1c1c1e"/>',
+    wave: '<path d="M26 70 C40 50 52 50 60 62 S80 76 94 56" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round"/>',
+  };
+  const neighbours = [
+    ['#34c759', '#1f9a3e', G.bars, 'Lists'], ['#0a84ff', '#0056d6', G.ring, 'Focus'], ['#ff9f0a', '#e8590c', G.bolt, 'Energy'],
+    ['#ff375f', '#c9184a', G.drop, 'Drops'], ['#5e5ce6', '#3a2fb8', G.grid, 'Board'], ['#1c1c1e', '#000000', G.wave, 'Waves'],
+    ['#ffd60a', '#f4a100', G.dot, 'Spot'],
   ];
   const placeholders = (n) => Array.from({ length: n }, (_, i) => {
-    const [a, b] = placeholderPalettes[i % placeholderPalettes.length];
+    const [a, b, glyph, name] = neighbours[i % neighbours.length];
     return `<div class="cell"><div class="icon sq" style="background:linear-gradient(180deg,${a},${b})">
-      <div class="ph"></div></div><div class="lbl">App ${i + 2}</div></div>`;
+      <svg viewBox="0 0 120 120" width="100%" height="100%">${glyph}</svg></div><div class="lbl">${name}</div></div>`;
   }).join('');
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const name = esc(label);
@@ -172,7 +187,7 @@ function previewHtml(pngDataUrl, label) {
   .cell{display:flex;flex-direction:column;align-items:center;gap:10px}
   .icon{width:120px;height:120px;position:relative;overflow:hidden}
   .icon img{width:100%;height:100%;display:block}
-  .ph{position:absolute;left:32px;top:32px;width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.22)}
+  .icon svg{display:block}
   .lbl{font-size:22px;letter-spacing:-.01em}
   .dark .lbl{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
   .light .lbl{color:#1b1b1f}
@@ -295,15 +310,17 @@ async function main() {
       log(`  ${p.name}  (${p.size}×${p.size})`);
     }
     const master = path.join(args.out, 'icon-1024.png');
+    const pdir = args.previewDir || args.out;
+    fs.mkdirSync(pdir, { recursive: true });
     if (args.preview) {
-      const file = path.join(args.out, 'preview.png');
+      const file = path.join(pdir, 'preview.png');
       await renderPreview(browser, master, args.label, file);
       log(`  preview.png  ← open this and look at it before deciding the icon is done`);
     }
     if (args.grid) {
       const gridSvg = path.join(__dirname, '..', 'assets', 'grid.svg');
       if (fs.existsSync(gridSvg)) {
-        const file = path.join(args.out, 'grid.png');
+        const file = path.join(pdir, 'grid.png');
         await renderGrid(browser, master, gridSvg, file);
         log(`  grid.png  (icon + layout grid)`);
       } else {
@@ -313,7 +330,12 @@ async function main() {
   } finally {
     await browser.close();
   }
-  log(`done → ${args.out}`);
+  // file size: grain and photographic texture do not compress; flag what a phone will download
+  const kb = (f) => { try { return fs.statSync(path.join(args.out, f)).size / 1024; } catch (_) { return 0; } };
+  const heavy = [['apple-touch-icon.png', 100], ['icon-192.png', 100], ['icon-512.png', 300]]
+    .filter(([f, lim]) => kb(f) > lim).map(([f, lim]) => `${f} ${kb(f).toFixed(0)} KB (> ${lim})`);
+  if (heavy.length) console.warn(`render.js: heavy files: ${heavy.join(', ')} — usually film grain; lower its alpha or drop it`);
+  log(`done → ${args.out}${args.previewDir ? `  (preview in ${args.previewDir})` : ''}`);
 }
 
 main().catch((e) => { console.error(`render.js: ${e.message}`); process.exit(1); });

@@ -22,6 +22,20 @@ iOS caches home-screen icons by URL. After re-rendering, change the URL (`?v=<ha
 `inject.py` does automatically) **and** remove + re-add the web clip on the phone. An existing
 home-screen shortcut never refreshes its icon on its own.
 
+**Service workers.** A PWA whose worker serves images cache-first (very common: "images, icons,
+manifests → cache-first") keeps returning the *old* PNG at the same URL, in the browser and in the
+manifest, until the worker's cache name changes. If the project has a worker, bump its cache version
+(or run the project's version/bump script) in the same change, and say so in the hand-off. If the
+worker precaches an explicit list of icon URLs, a `?v=` query makes those entries miss — update the
+list or rely on the version bump instead of the query.
+
+## URLs: relative unless you know the site root
+
+Root-absolute paths (`/icons/…`) break when the site lives under a sub-path (GitHub Pages serves
+`https://user.github.io/<repo>/`). `inject.py` therefore writes paths relative to the page
+(`icons/apple-touch-icon.png`). Use `--web-path /icons` only when the app is served from the domain
+root — typically build-tool layouts where `public/` is the root (Vite, Next, CRA).
+
 ## The name under the icon
 
 `<meta name="apple-mobile-web-app-title" content="Tidewatch">` — otherwise `<title>` is used, and
@@ -59,7 +73,9 @@ If the page is a plain content site, pass `--no-standalone` to `inject.py` and k
 must sit inside the central 80% circle (`validate.py` checks this). Because the exported icon is
 full-bleed with the glyph centred, the *same* 512 serves both purposes; a separate padded file is
 unnecessary. `background_color` is used for the splash/launch surface while the app loads — pick
-the tile's bottom colour so the icon appears to grow out of it.
+the tile's bottom colour so the icon appears to grow out of it. `theme_color` / `<meta name="theme-color">`
+colours the browser chrome beside the page, so it should match the page header (usually the brand
+colour) — keep a page's existing value; it is not the icon's colour.
 
 ## Favicon / tabs
 

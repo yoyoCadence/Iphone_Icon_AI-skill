@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-icons/preview.png was rendered and the trace shows it was opened/viewed before the final answer, with at least one revision of the SVG after looking at it or an explicit justification for not revising
+A home-screen preview (the icon shown among other icons at real size) was rendered and looked at, and the icon was revised at least once after looking

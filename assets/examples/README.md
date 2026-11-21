@@ -2,7 +2,9 @@
 
 Four icons produced with this skill's own pipeline, each with the concept note that preceded the
 SVG. They exist to calibrate the quality bar and to show one recipe each — copy the *approach*,
-never the icon.
+never the icon. **If a brief falls in one of these categories (surf/ocean, budgeting/coins,
+terminals, meditation), the example is now the cliché:** pick a different object, moment or style.
+Test runs showed agents drifting toward the nearest example's palette and motif when they didn't.
 
 ![gallery](gallery.png)
 

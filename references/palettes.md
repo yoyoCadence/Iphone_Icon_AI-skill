@@ -32,10 +32,26 @@ panels of `preview.png`.
 ## Deriving from a brand colour (when the page already has one)
 
 Given brand `H S L` (HSL):
-- **top stop**: `L + 12`, `S + 5`, hue rotated **toward yellow** (≈ `H − 10°` for blues/violets,
-  `H + 10°` for reds/oranges) — warm light from above.
-- **bottom stop**: `L − 24`, `S + 8`, hue rotated **toward blue/violet** by ≈ 10° — cool shade below.
-- **shadow tint**: bottom stop at `L − 20`, `S + 10`.
+- **top stop**: `L + 12`, hue rotated ≈ 10° **toward the nearest warm hue** — warm light from above.
+  Greens, cyans and blues (H 90–250): `H − 10°`. Violets, magentas, reds, oranges, yellows: `H + 10°`.
+  Saturation `+5` only if the brand's `S ≤ 70`; already-saturated brands go neon if pushed further.
+- **bottom stop**: `L − 24`, hue rotated ≈ 10° the *other* way — cool shade below; `S + 8` only if `S ≤ 70`.
+- **Dark brands** (brand `L < 35`): `L − 24` lands near black and vanishes on dark wallpapers. Use
+  top `L + 14` (and `S − 8`) and bottom `L × 0.55`, never below 12.
+
+| Brand | top stop | bottom stop |
+|---|---|---|
+| `#0E7490` (H193 L31 S82, dark) | `#1EC0C8` | `#08344F` (not `#021622`) |
+| `#1F6F7A` (H187 L30 S59, dark) | `#31B0AA` | `#0E3646` |
+| `#7C3AED` (H262 L58 S83) | `#B772F2` | `#2B0E9E` |
+| `#F59E0B` (H38 L50 S92) | `#F7D346` | `#803E05` |
+
+Treat these as the first draft of the tile and judge it in `preview.png`; a vivid brand may want the
+top stop toned down 5–10% S.
+- **shadow tint**: bottom stop at `L − 20` (floor 8), `S + 10`.
+- **Where the brand colour goes:** it is the page's `theme-color` (browser chrome next to the page
+  header) and usually the tile's mid-stop; the tile's *bottom* stop is the manifest `background_color`
+  (the splash the icon grows out of). A page that already sets `theme-color` keeps it.
 - **glyph**: white tinted 6–8% toward the brand hue (`#FFFFFF` → e.g. `#E9F0FF` for blue) if
   brand `L < 60`; otherwise a near-black of the brand hue (`L ≈ 14`, `S ≈ 40`).
 

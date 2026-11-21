@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-icon.svg exists with a 1024 viewBox and the glyph uses at least a gradient fill plus a shadow or inner-shadow filter (it is not a single flat shape on a flat or gradient background)
+The SVG source has a 1024 viewBox and its main subject uses a gradient fill plus a shadow or inner-shadow filter (it is not flat fills on a background)

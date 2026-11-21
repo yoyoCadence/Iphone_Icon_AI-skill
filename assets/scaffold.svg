@@ -34,12 +34,12 @@
       <stop offset="1" stop-color="#D9E3FF"/>
     </linearGradient>
     <!-- 4b. contact shadow: soft, offset downward, coloured by the background not pure black -->
-    <filter id="contactShadow" x="-30%" y="-30%" width="160%" height="170%">
+    <filter id="contactShadow" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
       <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#0A1B6E" flood-opacity="0.45"/>
     </filter>
     <!-- 4c. inner shadow: gives a flat shape thickness. Apply to the glyph shape itself. -->
-    <filter id="innerShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feOffset dx="0" dy="10"/>
+    <filter id="innerShadow" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+      <feOffset dx="-4" dy="-10"/>
       <feGaussianBlur stdDeviation="12" result="ob"/>
       <feComposite operator="out" in="SourceGraphic" in2="ob" result="inv"/>
       <feFlood flood-color="#1A2A8C" flood-opacity="0.55" result="col"/>
@@ -64,7 +64,7 @@
       <feComponentTransfer><feFuncA type="table" tableValues="0 0.10"/></feComponentTransfer>
     </filter>
     <!-- a soft blur for glows behind objects -->
-    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="soft" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024"><feGaussianBlur stdDeviation="40"/></filter>
   </defs>
 
   <!-- 1–3 background stack -->
