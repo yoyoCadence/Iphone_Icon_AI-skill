@@ -4,15 +4,21 @@ Use this as a starting list, not a menu. The twist is what makes the icon ownabl
 what makes it recognisable. Good icons keep enough of the cliché to be read, and change enough to
 be remembered. Combine with a style from `styles.md`.
 
+Twists marked ✱ are already used by a worked example in `assets/examples/` — use them only with a
+different palette and execution, and prefer the unmarked ones. The category's *core sign* (a prompt
+for a terminal, a coin for money, a lens for a camera) is not a cliché to avoid: it is the vocabulary
+that makes the icon readable at 29pt. Keep it when legibility needs it and put the twist into how it
+is drawn.
+
 | Category | Cliché (avoid as-is) | Twists that keep the read |
 |---|---|---|
-| Budget · finance · ledger | piggy bank, `$` | a coin seen at an angle with a rising arrow embossed; three stacked coins ascending; a pie slice lifted out of a disc; a receipt folded into a paper boat; a jar silhouette with a liquid level line |
+| Budget · finance · ledger | piggy bank, `$` | ✱ a coin seen at an angle with a rising arrow embossed; three stacked coins ascending; a ledger with a receipt tucked into it; a pie slice lifted out of a disc; a receipt folded into a paper boat; a jar silhouette with a liquid level line |
 | Notes · writing · journal | notepad + pencil | a legal-pad torn edge in yellow; a single ink drop forming a comma; a page corner fold with one highlight stroke; a pencil tip as a mountain peak |
-| Habits · wellness · meditation | lotus, generic heart | a sprout breaking a horizon; concentric breathing rings with one brighter; stacked stones (cairn); a sun ring filling clockwise |
+| Habits · wellness · meditation | lotus, generic heart | a sprout breaking a horizon; ✱ overlapping glass ripples with one still point; concentric breathing rings with one brighter; stacked stones (cairn); a sun ring filling clockwise |
 | Fitness · sport | dumbbell, running figure | a heartbeat line that becomes a mountain range; a track oval in perspective; a flame inside a ring; a shoe sole print as a leaf |
-| Weather · tide · surf · outdoors | cloud + sun | a wave curl backlit by a low sun; a single cloud casting a shadow on hills; a thermometer as a lighthouse; wind as three ribbons |
+| Weather · tide · surf · outdoors | cloud + sun | a surfboard seen from above on glassy swell lines; corduroy swell lines rolling toward the viewer; a tide gauge / buoy on one swell; ✱ a wave curl backlit by a low sun; a single cloud casting a shadow on hills; a thermometer as a lighthouse; wind as three ribbons |
 | Recipes · cooking · food | chef hat, fork & knife | a whisk whose wires form a spiral; a pot lid with steam shaped as a heart; a halved citrus as a sun; a wooden spoon casting a long shadow |
-| Developer tools · terminal | `</>` | a prompt chevron as a glowing wedge with a blinking block cursor; braces forming a shield; a command key extruded in metal |
+| Developer tools · terminal | `</>` | the prompt `>_` drawn in an unexpected material (warm amber phosphor, stamped metal, neon tube) with the twist in one part of it — e.g. the cursor as a physical object; ✱ a cyan glowing chevron with a coral block cursor on navy; braces forming a shield; a command key extruded in metal |
 | Reading · books · library | open book | a bookmark ribbon spilling from a slot; pages fanned as a bird's wing; a book spine stack as a skyline |
 | Music · audio · podcasts | note, headphones | a waveform as a mountain skyline at night; a vinyl disc with sunset grooves; a single speaker cone as a planet |
 | Travel · maps · navigation | pin, globe | a paper plane with a dotted trail; a compass needle as a sail; a passport stamp (circle + wedge); a road curve that becomes the initial |

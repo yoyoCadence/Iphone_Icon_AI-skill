@@ -78,46 +78,20 @@ Write the decisions down as a 6-line concept note before touching SVG. It takes 
 and prevents the drift where the icon slowly becomes "gradient + centred pictogram" again:
 
 ```
-App: Tidewatch — surf & tide forecasts            Tone: calm · precise · outdoors
-Essence: know the ocean before you go
-Idea: a single wave curl at the moment of breaking, backlit by a low sun (literal + action)
-Style: G Horizon Scene with a rendered wave        Palette: dusk sky #FFB36B→#3B2A6B, sea #0E6E9E→#063B5E, foam #FFF7EC
-Light: top-left sun behind the curl, rim on the lip
-Name under icon: "Tidewatch" (9 chars)
+App / tone:  Bramble — plant-care reminders · warm · patient · tactile
+Essence:     it grows because you came back
+Idea:        a terracotta pot seen slightly from above, one sprout casting a long morning shadow
+             (literal object + the moment it changes; the shadow makes "time" visible)
+Style:       B Rendered Object
+Palette:     tile #F6E7C8 → #E2B98A (pale, warm) · pot #E07A4F → #9C3F22 · leaf #6FCF7F → #2F8A4A
+Light:       low sun from the left; long shadow to the right, rim on the leaf edge
+Name:        "Bramble" (7 chars)
 ```
+(This category is deliberately not one of `assets/examples/` — never copy an example's concept.)
 
-## 4. Build the SVG
+## 4–6. Build, render and critique, deliver
 
-Start from `assets/scaffold.svg` (1024 viewBox, lighting rig pre-wired) and follow the recipe
-for the chosen style in `styles.md`. Non-negotiables that come from how iOS treats the file:
-
-- Full-bleed opaque square. No rounded corners, no transparent margin, no drop shadow around the
-  tile — iOS masks and shades the tile itself; anything you add gets doubled or cropped.
-- Main glyph within the centre ~62% (x,y ≈ 195…830 at 1024); nothing meaningful within 10% of the
-  edge. Corners carry only background.
-- Minimum stroke ≈ 28px at 1024 (≈ 5px at 180); minimum gap between shapes ≈ 24px.
-- Glyph drawn as paths. Text only for a monogram, with a font stack
-  (`-apple-system, "SF Pro Display", Inter, "Helvetica Neue", Arial, sans-serif`) and weight ≥ 700.
-- Filters need a generous region (`x="-30%" y="-30%" width="160%" height="160%"`) or blurs clip
-  to a hard rectangle.
-
-## 5. Render, look, critique, revise (at least once)
-
-```bash
-node scripts/render.js icon.svg --out icons --label "Name" --grid
-python3 scripts/validate.py icons/icon-1024.png
-```
-
-Then open `icons/preview.png` with the image viewer you have (the `Read` tool renders PNGs) and go
-through `critique.md`. First drafts are reliably off in the same places: glyph 10–15% too small,
-light slightly inconsistent, gradient a touch muddy, visual centre low. Fix the top two issues,
-re-render, look again. Two rounds is normal; stop when the 60pt tile reads instantly *and* the
-1024 hero still looks designed rather than assembled.
-
-## 6. Deliver
-
-`python3 scripts/inject.py index.html --name "Name" --theme "#hex"` wires the tags and writes the
-manifest (`ios-delivery.md` explains every tag and the on-device test). Show the user the preview,
-state what the icon depicts and why, and name the one assumption they are most likely to want to
-change (usually tone or colour). Offer the runner-up concept in one sentence — it costs nothing and
-often converts.
+These steps live in `SKILL.md` (steps 3–5) with the exact commands; the recipes are in `styles.md`,
+the critique order in `critique.md`, the delivery details in `ios-delivery.md`. Two reminders that
+matter most here: block out the silhouette flat before adding material, and stop polishing when the
+29pt tile reads instantly among bright neighbours and the 1024 hero shows one consistent light.

@@ -67,6 +67,30 @@ def inside_maskable(x, y, n=256):
     return u * u + v * v <= 0.8 * 0.8
 
 
+def subject_map(px, n):
+    """Coverage and contrast-weighted centre of the subject: pixels that differ from a background
+    estimated per row from the left/right edge ring (handles vertical and diagonal gradients)."""
+    ring = int(n * 0.06)
+    left = [median_color([px[x, y] for x in range(ring)]) for y in range(n)]
+    right = [median_color([px[x, y] for x in range(n - ring, n)]) for y in range(n)]
+    ink = tot = 0
+    sx = sy = sw = 0.0
+    for y in range(n):
+        for x in range(n):
+            if not inside_squircle(x, y, n):
+                continue
+            tot += 1
+            f = x / (n - 1)
+            bgp = [left[y][i] * (1 - f) + right[y][i] * f for i in range(3)]
+            dist = math.dist(px[x, y][:3], bgp)
+            if dist > 60:
+                ink += 1
+                sx += x * dist; sy += y * dist; sw += dist
+    if not sw:
+        return 0.0, 0.5, 0.5
+    return ink / tot, sx / sw / n, sy / sw / n
+
+
 def analyse(path: Path):
     im = Image.open(path)
     im.load()
@@ -77,7 +101,7 @@ def analyse(path: Path):
     if w != h:
         findings.append(("fail", f"not square ({w}×{h}); iOS stretches non-square icons"))
     if w < 1024:
-        findings.append(("warn", f"{w}px master; keep a 1024 master so every size is downscaled, never upscaled"))
+        findings.append(("ok", f"{w}px file — checked as a derived size; the verdict that matters is on the 1024 master"))
 
     rgba = im.convert("RGBA")
     alpha = rgba.getchannel("A")
@@ -120,32 +144,46 @@ def analyse(path: Path):
         bbox = (min(xs), min(ys), max(xs), max(ys))
         bw = (bbox[2] - bbox[0] + 1) / n
         bh = (bbox[3] - bbox[1] + 1) / n
-        cx = (bbox[0] + bbox[2]) / 2 / n
-        cy = (bbox[1] + bbox[3]) / 2 / n
-        metrics["glyph_extent"] = {"width": round(bw, 3), "height": round(bh, 3), "cx": round(cx, 3), "cy": round(cy, 3)}
         ext = max(bw, bh)
-        if ext < 0.38:
+        scene = ext >= 0.95
+        coverage, cx, cy = subject_map(px, n)
+        metrics["glyph_extent"] = {"width": round(bw, 3), "height": round(bh, 3)}
+        metrics["subject"] = {"coverage": round(coverage, 3), "cx": round(cx, 3), "cy": round(cy, 3), "scene": scene}
+        if scene:
+            findings.append(("ok", "full-bleed scene (detail reaches the edges) — judge the focal shape: it should span "
+                                   "≥ 24% of the width and sit inside the centre 62%"))
+        elif ext < 0.38:
             findings.append(("warn", f"glyph spans only {ext*100:.0f}% of the icon — will look timid at 60pt; most good icons sit at 50–72%"))
         elif ext > 0.9:
-            findings.append(("warn", f"detail spans {ext*100:.0f}% of the icon — fine for a full-bleed scene, but then the focal element must sit "
-                                     "inside the centre ~62%; for a glyph-on-tile icon this means it touches the mask (iOS crops corners, Android a circle)"))
+            findings.append(("warn", f"glyph spans {ext*100:.0f}% of the icon — it touches the mask (iOS crops corners, Android a circle)"))
         else:
-            findings.append(("ok", f"glyph spans {ext*100:.0f}% of the icon"))
+            findings.append(("ok", f"glyph spans {ext*100:.0f}% of the icon (bounding box)"))
+        note = (f"subject covers {coverage*100:.0f}% of the tile area — reference: solid objects read best at ~28–45%, "
+                "line/glow glyphs at ~10–20% with contrast ≥ 4:1. The bounding box can look big while the subject is small; "
+                "compare against the bright neighbours in preview.png")
+        if scene:
+            findings.append(("ok", f"subject coverage {coverage*100:.0f}% (background texture inflates this for scenes; "
+                                   "judge the focal shape by eye)"))
+        else:
+            pending_coverage = (coverage, note)   # judged after contrast: thin glyphs are fine when crisp
         off = math.hypot(cx - 0.5, cy - 0.5)
-        if off > 0.06:
-            findings.append(("warn", f"glyph centre is off by {off*100:.0f}% (cx={cx:.2f}, cy={cy:.2f}); fine if deliberate, "
+        if scene:
+            findings.append(("ok", f"focal mass at (cx={cx:.2f}, cy={cy:.2f}) — scenes may compose off-centre; keep the focal shape "
+                                   "inside the centre 62%"))
+        elif off > 0.06:
+            findings.append(("warn", f"visual centre of mass is off by {off*100:.0f}% (cx={cx:.2f}, cy={cy:.2f}); fine if deliberate, "
                                      "but optical centring usually means ≤3% and slightly ABOVE geometric centre"))
         else:
-            findings.append(("ok", f"glyph centred (cx={cx:.2f}, cy={cy:.2f})"))
+            findings.append(("ok", f"visual centre of mass (cx={cx:.2f}, cy={cy:.2f})"))
 
         outside_sq = sum(1 for (x, y) in edge if not inside_squircle(x, y, n))
         outside_mask = sum(1 for (x, y) in edge if not inside_maskable(x, y, n))
         metrics["edge_outside_squircle"] = outside_sq
         metrics["edge_outside_maskable_circle"] = outside_mask
-        if outside_sq / len(edge) > 0.01:
+        if outside_sq / len(edge) > 0.01 and not scene:
             findings.append(("warn", f"{outside_sq/len(edge)*100:.0f}% of detail lies in the corners iOS masks away — "
                                      "unless it is background texture, pull it inward"))
-        if outside_mask / len(edge) > 0.08:
+        if outside_mask / len(edge) > (0.25 if scene else 0.03):
             findings.append(("warn", f"{outside_mask/len(edge)*100:.0f}% of detail lies outside the Android maskable safe circle (80%) — "
                                      "acceptable for iOS-only, otherwise keep the core glyph inside"))
 
@@ -191,13 +229,21 @@ def analyse(path: Path):
             else:
                 findings.append(("ok", f"main tonal contrast {cr:.1f}:1"))
 
+    if "pending_coverage" in locals():
+        cov, note = pending_coverage
+        cr = metrics.get("glyph_contrast", 0)
+        weak = cov > 0.7 or cov < 0.05 or (cov < 0.10 and cr < 4.0)
+        findings.append(("warn" if weak else "ok", note if weak or cov >= 0.10 else
+                         f"subject covers {cov*100:.0f}% — thin, but contrast {cr:.1f}:1 keeps a line/glow glyph legible"))
+
     # --- colour richness ----------------------------------------------------------------------
     pal = work.convert("P", palette=Image.ADAPTIVE, colors=64)
     counts = sorted(((c, i) for c, i in pal.getcolors(65536) or []), reverse=True)
     significant = [c for c, _ in counts if c / (n * n) > 0.004]
     metrics["significant_colours"] = len(significant)
     if len(significant) < 4:
-        findings.append(("warn", f"only {len(significant)} significant colours — reads as flat clip-art; add gradient, light and shadow"))
+        findings.append(("warn", f"only {len(significant)} significant colours — expected for a flat block-out; for the final "
+                                 "icon add gradient, light and shadow or it reads as clip-art"))
     else:
         findings.append(("ok", f"{len(significant)} significant colours (tonal depth present)"))
 

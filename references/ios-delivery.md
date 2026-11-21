@@ -22,6 +22,27 @@ iOS caches home-screen icons by URL. After re-rendering, change the URL (`?v=<ha
 `inject.py` does automatically) **and** remove + re-add the web clip on the phone. An existing
 home-screen shortcut never refreshes its icon on its own.
 
+**Service workers.** A PWA whose worker serves images cache-first (very common: "images, icons,
+manifests → cache-first") keeps returning the *old* PNG at the same URL, in the browser and in the
+manifest, until the worker's cache name changes. If the project has a worker, bump its cache version
+(or run the project's version/bump script) in the same change, and say so in the hand-off. If the
+worker precaches an explicit list of icon URLs, a `?v=` query makes those entries miss — update the
+list or rely on the version bump instead of the query.
+
+## URLs: choose by how the site is served
+
+iOS reads the `apple-touch-icon` from whatever page the user is on when they tap *Add to Home Screen*,
+so the href must resolve from every page:
+
+| Site | Use | Breaks if you use the other |
+|---|---|---|
+| all pages in one folder (plain HTML, GitHub Pages project site `user.github.io/<repo>/`) | relative `icons/…` (inject.py default) | `/icons/…` 404s under `/<repo>/` |
+| single-page app with nested routes (`/spot/123`) served at the domain root (Vite, Next, CRA `public/`) | `--web-path /icons` | `icons/…` resolves to `/spot/icons/…` |
+| single-page app with nested routes under a sub-path | `--web-path /<base>/icons` | both of the above |
+
+When there is no code yet, pick the most likely row, say which one you assumed, and give the one-line
+change for the other case.
+
 ## The name under the icon
 
 `<meta name="apple-mobile-web-app-title" content="Tidewatch">` — otherwise `<title>` is used, and
@@ -38,6 +59,7 @@ short brand name; never a slogan.
 Launching from the home screen hides Safari's address bar and navigation. Consequences:
 - the page must provide its own back/close affordances; no browser back button;
 - links to other origins open in an in-app browser sheet; same-origin navigation stays inside;
+- `default` is a light status bar with dark text — wrong above a dark UI; dark apps use `black`;
 - the status bar overlays the page with `black-translucent`; use
   `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`
   and `padding-top: env(safe-area-inset-top)` on the header;
@@ -59,7 +81,9 @@ If the page is a plain content site, pass `--no-standalone` to `inject.py` and k
 must sit inside the central 80% circle (`validate.py` checks this). Because the exported icon is
 full-bleed with the glyph centred, the *same* 512 serves both purposes; a separate padded file is
 unnecessary. `background_color` is used for the splash/launch surface while the app loads — pick
-the tile's bottom colour so the icon appears to grow out of it.
+the tile's bottom colour so the icon appears to grow out of it. `theme_color` / `<meta name="theme-color">`
+colours the browser chrome beside the page, so it should match the page header (usually the brand
+colour) — keep a page's existing value; it is not the icon's colour.
 
 ## Favicon / tabs
 

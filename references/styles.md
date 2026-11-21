@@ -5,6 +5,18 @@ of `assets/scaffold.svg` (bg → glow → vignette → glyph → sheen → grain
 enough to paste; rename ids you change. Numbers are starting points calibrated for 1024 — keep
 their ratios when you scale.
 
+**Two rules that every snippet below already follows:**
+- *Filter regions cover the canvas with a margin* (`filterUnits="userSpaceOnUse" x="-256" y="-256"
+  width="1536" height="1536"`). Percentage regions are measured on the shape's bounding box *without its
+  stroke*, so they slice the tips off stroked glyphs and box thin shapes' blurs into visible rectangles —
+  only visible at 1024, which is why `grid.png` exists. The region is in the *local* coordinates of the
+  element that uses the filter: the 256 px margin keeps it covering the tile inside groups rotated about
+  the centre or nudged a little, and stops full-tile blurs from fading at the edges. For a group moved
+  far off-centre, put the filter on an outer, untransformed group instead.
+- *Bold before beautiful.* Block the silhouette out in flat colours first and check it at 29pt among
+  bright neighbours (`preview.png`); add material only once the flat version already wins. Refinement
+  never rescues a subject that is too small or too pale.
+
 Contents
 - Shared building blocks (gradients that don't go muddy, shadow, inner shadow, rim, specular, glow, grain)
 - A. Lit Glyph · B. Rendered Object · C. Liquid Glass · D. Layered Paper · E. Luminous · F. Monogram · G. Horizon Scene
@@ -35,22 +47,25 @@ Add a third mid-stop only to push saturation (gradients desaturate in the middle
 
 **Contact shadow (tinted, soft, downward).**
 ```xml
-<filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+<filter id="shadow" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536">
   <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#0A1B6E" flood-opacity="0.45"/>
 </filter>
 ```
 
 **Inner shadow (gives a flat shape thickness; apply to the shape itself).**
 ```xml
-<filter id="inner" x="-20%" y="-20%" width="140%" height="140%">
-  <feOffset dx="0" dy="10"/><feGaussianBlur stdDeviation="12" result="ob"/>
+<filter id="inner" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536">
+  <feOffset dx="-4" dy="-10"/><feGaussianBlur stdDeviation="12" result="ob"/>
   <feComposite operator="out" in="SourceGraphic" in2="ob" result="inv"/>
   <feFlood flood-color="#1A2A8C" flood-opacity="0.55" result="col"/>
   <feComposite operator="in" in="col" in2="inv" result="sh"/>
   <feComposite operator="over" in="sh" in2="SourceGraphic"/>
 </filter>
 ```
-Flip `dy` negative for a top-lit *inset* (engraved) look.
+The offset points *toward* the light (here up-left), so the shadow lands on the bottom-right inner
+edge — a raised shape lit from the top-left. Point it *away* from the light (`dx="4" dy="10"`) for an
+inset / engraved / debossed look (a slot, a stamped label). Getting this backwards turns a dome into
+a dent; if a shape looks sunken, flip the sign.
 
 **Rim light** — the same path stroked with a gradient that fades out toward bottom-right:
 ```xml
@@ -62,21 +77,23 @@ Flip `dy` negative for a top-lit *inset* (engraved) look.
 
 **Specular highlight** (glossy materials only) — a blurred white ellipse near the top-left of the form:
 ```xml
-<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+<filter id="soft" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="14"/></filter>
 <ellipse cx="430" cy="380" rx="120" ry="60" fill="#fff" opacity="0.55" filter="url(#soft)" transform="rotate(-25 430 380)"/>
 ```
 
 **Outer glow** (luminous things) — duplicate the shape beneath itself, blurred, at lower opacity.
 Two blurs (tight + wide) look far better than one.
 ```xml
-<filter id="glowTight" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
-<filter id="glowWide"  x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="48"/></filter>
+<filter id="glowTight" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="14"/></filter>
+<filter id="glowWide" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="48"/></filter>
 <use href="#stroke" filter="url(#glowWide)"  opacity="0.55"/>
 <use href="#stroke" filter="url(#glowTight)" opacity="0.8"/>
 <use href="#stroke"/>
 ```
 
-**Grain** — removes plastic flatness; invisible at 60pt, felt at 1024.
+**Grain** — removes plastic flatness; invisible at 60pt, felt at 1024. Costs bytes: noise does not
+compress, so it roughly doubles to quadruples PNG size (icon-512 ≈ 250 KB; smooth gradients and big blurs alone already land around 150–250 KB). Keep
+alpha ≤ 0.08, and skip it for scenes that already have texture.
 ```xml
 <filter id="grain" x="0" y="0" width="100%" height="100%">
   <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
@@ -117,7 +134,7 @@ Build the object from three stacked copies of its silhouette:
   <stop offset="0" stop-color="#FFE39A"/><stop offset="0.55" stop-color="#F2B233"/><stop offset="1" stop-color="#B86A0A"/>
 </linearGradient>
 <!-- 2. ambient occlusion: dark ellipse under the object, heavily blurred -->
-<filter id="ao" x="-50%" y="-50%" width="200%" height="300%"><feGaussianBlur stdDeviation="30"/></filter>
+<filter id="ao" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="30"/></filter>
 <ellipse cx="512" cy="760" rx="260" ry="46" fill="#3A1C00" opacity="0.5" filter="url(#ao)"/>
 <!-- 3. body + inner shadow for thickness -->
 <circle cx="512" cy="500" r="270" fill="url(#body)" filter="url(#inner)"/>
@@ -142,7 +159,7 @@ makes it unique.
 
 ```xml
 <rect width="1024" height="1024" fill="#0F1430"/>                        <!-- deep base -->
-<filter id="blob" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="110"/></filter>
+<filter id="blob" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"><feGaussianBlur stdDeviation="110"/></filter>
 <circle cx="300" cy="300" r="260" fill="#FF6AC1" filter="url(#blob)" opacity="0.9"/>   <!-- 2–3 blobs -->
 <circle cx="720" cy="420" r="280" fill="#5B7BFF" filter="url(#blob)" opacity="0.9"/>
 <circle cx="520" cy="820" r="240" fill="#38E1C9" filter="url(#blob)" opacity="0.8"/>
@@ -168,7 +185,7 @@ shape overlapping the first gives the signature "stacked panes" look — stop at
 *Why it works:* layers imply content and order; shadows between layers provide depth without gloss.
 
 ```xml
-<filter id="paper" x="-20%" y="-20%" width="140%" height="150%">
+<filter id="paper" filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536">
   <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#3B2B00" flood-opacity="0.25"/>
 </filter>
 <g transform="rotate(-6 512 512)">
@@ -225,10 +242,21 @@ differ by machine; if the letter lands low or clipped, adjust `y`, don't trust t
 *When:* weather, travel, outdoor, mood, sleep, surf, photography.
 *Why it works:* a horizon is the most universal "place" and the easiest scene to read at 29pt.
 
-Rules: the horizon line sits at 55–65% height; the light source (sun/moon) is a flat disc with a
-wide glow, overlapping the horizon or a landform; landforms are 2–3 simple curves that get
-**lighter and closer to the sky colour as they recede** (atmospheric perspective); one foreground
-layer is the darkest and carries the only sharp detail. No stars by default — they are noise.
+*Why it usually fails:* it becomes a wallpaper — lovely at 1024, a smear at 29pt. A scene is an icon
+only if it has **one bold focal shape** that survives alone.
+
+Rules:
+- **Focal shape first.** The sun/moon disc (or the one landform, boat, peak, wave) spans **≥ 24% of the
+  tile width** (≈ 250 px at 1024) and has the highest contrast in the image. Everything else is support.
+- **Horizon height follows the subject.** Subject in the sky (sun, peak, skyline) → horizon at 55–65%.
+  Subject on the water/land (swell lines, a field, a road) → horizon at 30–42%, so the subject sits in the
+  optical centre.
+- The light source is a flat disc with a wide glow, overlapping the horizon or a landform.
+- Landforms: 2–3 simple curves that get **lighter and closer to the sky colour as they recede**
+  (atmospheric perspective); one foreground layer is the darkest and carries the only sharp detail.
+- ≤ 3 recessive layers. No stars by default — they are noise. No photographic texture.
+- A full-bleed scene always "touches the mask" in `validate.py` (it reports `scene` instead of warning);
+  what must stay inside the centre 62% is the focal shape.
 
 ```xml
 <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B1E5E"/><stop offset="1" stop-color="#FF9E5E"/></linearGradient>

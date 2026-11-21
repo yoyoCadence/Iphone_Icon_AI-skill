@@ -7,92 +7,123 @@ compatibility: Node.js ≥ 18 with Playwright + Chromium for rendering (`npm i -
 # iPhone home-screen icon
 
 You are designing the smallest piece of brand a product will ever have: a ~60pt tile that must be
-read in 200 ms among twenty neighbours, must not be confusable with any other app, and must still
-look designed at 1024 px. Treat it as a design job with an engineering delivery at the end —
+read in 200 ms among twenty bright neighbours, must not be confusable with any other app, and must
+still look designed at 1024 px. Treat it as a design job with an engineering delivery at the end —
 not as "draw a shape on a gradient and export".
 
 Reply in the user's language. Keep the conversation short and the work visible: concept note →
-rendered preview → one revision → delivery.
+rendered preview → revision → delivery.
 
 ## Workflow
 
+### 0. Is there already an icon? (30 seconds, saves the most damage)
+Search the project before designing: `apple-touch-icon`, `manifest`, an icon source SVG, an icon
+build script (`npm run icons`, `make-icons`, `pwa-asset-generator`…), tests that open the icon PNGs,
+and a service worker. If any exist, **the project's pipeline and tests are the contract**: edit its
+source, run its build, run its tests, keep its tag wiring and file paths. Render the *current* icon
+with `render.js` too, so you critique and present before/after rather than a cold redesign — and
+treat an existing icon's colours and motif as brand equity to evolve unless the user asks for new.
+
 ### 1. Brief (≤ 2 minutes)
 Collect: **name** (as shown under the icon, ≤ 11 chars), **what it does** in one sentence,
-**tone** (three adjectives), **existing colours/logo**, **audience**. If the user gave an HTML/CSS
-file or folder, run `python3 scripts/extract_brand.py <files>` to pull title, colours, fonts and
-copy. Fill gaps with stated assumptions instead of questions — one line: "Assuming: calm,
-outdoorsy, no brand colour yet — say so if wrong."
+**tone** (three adjectives), **existing colours/logo**, **audience**. For an HTML/CSS project run
+`python3 scripts/extract_brand.py <files>`. Fill gaps with stated assumptions instead of
+questions — one line: "Assuming: calm, outdoorsy, no brand colour yet — say so if wrong."
 
 ### 2. Concept (write it down before drawing)
-Read `references/design-process.md` §1–3 the first time you use this skill in a session. Then
-produce a six-line concept note in your reply:
-
-```
-App / tone · Essence (5 words) · Idea (metaphor + its twist) · Style (A–G) · Palette (top→bottom, glyph, accent) · Light
-```
-
+Read `references/design-process.md` §1–3 the first time you use this skill in a session, then write
+the concept note in the format shown there (App/tone · Essence · Idea · Style · Palette · Light).
 The idea must pass three tests: readable at **29pt** from silhouette alone; **ownable** ("could
 this be any app in the category?" must be *no*); **no collision** with a famous icon combo.
-Use `references/metaphors.md` for category twists and `references/palettes.md` for gradient pairs.
-If tone is genuinely ambiguous (e.g. "finance" with no other cue), make **two** concepts and
-render both; otherwise make one and keep a runner-up sentence for the hand-off.
+Use `references/metaphors.md` for category twists and `references/palettes.md` for colours.
+Make **two** concepts only when the brief gives nothing beyond a category; otherwise make one and
+keep a runner-up sentence for the hand-off. If you are torn between concepts, block both out and
+judge them side by side with `render.js --compare a.svg b.svg`.
 
-### 3. Build the SVG
-Copy `assets/scaffold.svg` (1024 viewBox, lighting rig pre-wired) to the project as `icon.svg`
-and follow the recipe for the chosen style in `references/styles.md`. Rules that come from how
-iOS treats the file — these are not stylistic preferences:
+The worked examples in `assets/examples/` calibrate quality. When a brief is in an example's
+category, don't reuse the example's *twist, palette or execution* — but keep the category's core sign
+(a prompt for a terminal, a coin or ledger for money) if legibility needs it; dropping it to be
+different trades away the 29pt read. If the user's real brand colours happen to match an example's,
+the brand wins: keep the colours and differ in object, composition or which colour is the tile.
 
+### 3. Build the SVG — bold first, beautiful second
+1. **Block out** the silhouette in flat colours, render it with `--draft` (step 4; previews only,
+   deployable PNGs untouched), and check the 29pt tile among the bright neighbours in `preview.png`. Solid subjects usually cover ~28–45 % of the tile
+   (`validate.py` reports coverage); line/glow glyphs can be thinner if contrast is ≥ 4:1.
+   Refinement never rescues a subject that is too small or too pale — fix that here.
+2. **Then add material** with the recipe for the chosen style in `references/styles.md`.
+   Styles A/B/E/F start from `assets/scaffold.svg` (lighting rig pre-wired); C/D/G start from their
+   recipe and reuse only the scaffold's filters. For a stroke whose width or colour must change along
+   its length (trail, orbit, brush, swoosh), generate it with `scripts/ribbon.py`.
+
+Rules that come from how iOS and SVG behave — not stylistic preferences:
 - Full-bleed **opaque square**; no rounded corners, no outer shadow, no transparent margin
   (iOS masks the squircle and composites over black).
-- Main glyph inside the centre ~62 % (x,y ≈ 195…830); corners carry only background.
-- Strokes ≥ 28 px, gaps ≥ 24 px at 1024; text only for a monogram (≤ 2 letters, weight ≥ 700).
-- One light source (top-left unless the scene defines its own sun); tinted shadows, never black.
-- Filters get a generous region (`x="-30%" y="-30%" width="160%" height="160%"`).
-- Glyph as paths with **material**: fill gradient + inner shadow + contact shadow + rim at minimum.
-  A flat white pictogram is the single biggest tell of a generated icon.
+- Main subject inside the centre ~62 % (x,y ≈ 195…830); corners carry only background.
+- Glyph strokes ≥ 28 px, gaps ≥ 24 px at 1024; text only for a monogram (≤ 2 letters, weight ≥ 700).
+- One light source (top-left unless the scene has its own sun); tinted shadows, never black.
+- Filter regions cover the canvas: `filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"`.
+  Percentage regions clip stroked and thin shapes into hard edges.
+- Colour discipline: two hues in the tile, one hero object/glyph, at most one secondary accent.
 
 ### 4. Render → look → critique → revise
 ```bash
-node  scripts/render.js  icon.svg --out icons --label "Name" --grid
-python3 scripts/validate.py icons/icon-1024.png
+node  scripts/render.js  icon.svg --out icons --preview-dir icon-design --label "Name" --grid   # add --draft for block-outs
+python3 scripts/validate.py icon-design/icon-1024.png
 ```
-Then **Read `icons/preview.png`** (it renders as an image) and go through
-`references/critique.md` in order: 29pt test → neighbour test → ownership → scale/centre →
-light/material → restraint. Fix the top two findings, re-render, look again. First drafts are
-reliably 10–15 % too small, slightly low, and a little muddy — expect one revision; two is fine;
-five means the concept is wrong, go back to step 2. Treat `validate.py` output as mechanical
-facts (transparency, extent, contrast, corner intrusion), and your eyes as the judge of beauty.
+**Read `icon-design/preview.png`** (renders as an image) and go through `references/critique.md`
+in order: 29pt test → neighbour test → ownership → scale/centre → light/material → restraint.
+Then open `icon-design/grid.png` (1024) for what the small sheet hides: clipped blurs, sliced tips,
+banding, stray seams. Fix the top two findings, re-render, look again. Block-outs and side-by-side
+comparisons don't count as rounds; expect one to three material rounds after the block-out, and small
+local fixes are fine. If the *concept* had to change twice, go back to step 2. `validate.py` gives mechanical facts
+(transparency, coverage, centre of mass, contrast, corner intrusion); your eyes judge the rest.
 
 ### 5. Deliver
-```bash
-python3 scripts/inject.py index.html --name "Name" --theme "#bottom-stop" [--no-standalone]
-```
-This inserts a managed block (`apple-touch-icon`, manifest link, theme-color, web-app title,
-standalone metas), writes `manifest.webmanifest`, cache-busts URLs, and removes competing tags.
-If there is no HTML yet, `--print` outputs the block + manifest to paste. Read
-`references/ios-delivery.md` for what each tag does, the standalone-mode trade-off (say it to
-the user in one sentence), and the two-minute on-device test.
+- **Page without icon wiring:** `python3 scripts/inject.py index.html --name "Name" --bg "#tile-bottom"`.
+  It keeps the page's own `theme-color`, status-bar and web-app choices unless you pass the matching
+  option (`--theme` = the brand colour for a page that has none), writes or updates the manifest, and
+  cache-busts.
+- **Pick the URL style by how the site is served:** all pages in one folder (plain HTML, GitHub Pages
+  project site) → the default relative URLs; a single-page app with nested routes (`/spot/123`) at the
+  domain root → `--web-path /icons`; such an app under a sub-path → `--web-path /<base>/icons`. Relative
+  URLs break on nested routes; root-absolute ones break under a sub-path. State the assumption.
+- **Page already wired:** `inject.py` refuses and prints the paths in use — render to those paths
+  (or run the project's own build) instead of rewiring. `--force` only on explicit request.
+- **No HTML yet:** `inject.py --print --out <site-root> --name … --theme … [--web-path /icons]` writes the
+  manifest into the site root (e.g. `public/`), `head-snippet.html` into the current folder (not
+  deployed), and prints the snippet.
+- **Dark apps:** pass `--status-bar black`; the default (`default`) gives a light status bar that looks
+  wrong above a dark UI. `black-translucent` draws the page under the status bar and needs
+  `env(safe-area-inset-top)` padding.
+- **Build-tool layouts** (`public/` in Vite/Next): render with `--out public/icons --preview-dir
+  icon-design` so previews are not deployed; web paths then start at `/icons/`.
+- **Service worker present:** a cache-first worker keeps serving the old PNG at the same URL — bump
+  its cache version (or the project's version script) and say so.
 
-Hand off with: the preview image, one sentence on what the icon depicts and why it fits, the
-file list, the assumption most likely to be wrong, and the runner-up concept in one line.
+Read `references/ios-delivery.md` for the tags, the standalone trade-off (tell the user in one
+sentence) and the two-minute on-device test. Hand off with: the preview image, one sentence on what
+the icon depicts and why it fits, the file list, the assumption most likely to be wrong, and the
+runner-up concept in one line.
 
 ## Output layout
 ```
 <project>/
 ├── icon.svg                 ← editable master, keep it
-├── icons/
-│   ├── icon-1024.png  icon-512.png  icon-192.png  apple-touch-icon.png (180)
-│   ├── preview.png  grid.png  icon.svg
+├── icons/                   ← deployable: icon-512/192.png, apple-touch-icon.png (180), icon.svg
+├── icon-design/             ← not deployed: icon-1024.png (master), preview.png, grid.png, compare.png
 ├── manifest.webmanifest
-└── index.html               ← <head> block injected
+└── index.html               ← <head> block injected (or the project's existing wiring, untouched)
 ```
-No project? Create `./<app-slug>-icon/` with the same layout.
+No project files yet? If the current folder is the user's (empty) project folder, use it directly;
+create `./<app-slug>-icon/` only when the current folder is unrelated.
 
 ## Quality bar (what "done" means)
-- The 29pt tile is nameable; the 1024 hero shows one consistent light and a real material.
-- Two hues in the tile, one glyph tone, at most one accent; gradients hue-shifted, never muddy.
+- The 29pt tile is nameable and holds its own next to the bright neighbours on both wallpapers.
+- The 1024 hero shows one consistent light and a real material, with no clipped edges in `grid.png`.
 - The icon could not be swapped with a competitor's without someone noticing.
-- validate.py shows no ✗; the only ⚠ left are ones you can defend in a sentence.
+- validate.py shows no ✗; the only ⚠ left are ones you can defend in a sentence; the project's own
+  icon tests (if any) pass.
 
 ## Reference map
 | Need | Read |
@@ -102,15 +133,17 @@ No project? Create `./<app-slug>-icon/` with the same layout.
 | gradient pairs, deriving from a brand colour, collisions | `references/palettes.md` |
 | metaphors + twists by app category | `references/metaphors.md` |
 | what to look for in preview.png, fixes | `references/critique.md` |
-| tags, manifest, caching, standalone, device test | `references/ios-delivery.md` |
+| tags, manifest, caching, service workers, standalone, device test | `references/ios-delivery.md` |
 | finished examples with their concept notes | `assets/examples/README.md` |
 
 ## Scripts
 | Script | Does |
 |---|---|
-| `scripts/render.js <svg> --out <dir> --label <name> [--grid] [--sizes 167,152]` | SVG → PNG set + preview sheet (Playwright/Chromium) |
-| `scripts/validate.py <png> [--json]` | transparency, glyph extent/centre, corner & maskable intrusion, contrast, tonal depth |
-| `scripts/inject.py <html> --name --theme [--bg --start-url --status-bar --no-standalone --print]` | head tags + manifest, idempotent, cache-busted |
+| `scripts/render.js <svg> --out <dir> [--preview-dir <dir>] [--draft] --label <name> [--grid] [--sizes 167,152]` | SVG → PNG set + home-screen preview among bright neighbours (Playwright/Chromium); `--draft` for block-outs; warns on heavy files |
+| `scripts/render.js --compare a.svg b.svg [c.svg d.svg] --out icon-design` | variants side by side at hero, 60pt and 29pt among bright neighbours |
+| `scripts/validate.py <png> [--json]` | transparency, subject coverage, centre of mass, corner & maskable intrusion, contrast, tonal depth; scene-aware |
+| `scripts/inject.py <html> --name [--theme --bg --web-path --start-url --status-bar --no-standalone --force --print --out --snippet]` | head tags + manifest; refuses to rewire an already-wired page; relative URLs by default; idempotent |
+| `scripts/ribbon.py --path/--spiral … --width A:B --colors … [--range T0:T1 --cap round --side front\|back]` | variable-width, colour-graded strokes (trails, orbits, brush strokes) as seamless SVG |
 | `scripts/extract_brand.py <html/css…>` | title, colours, fonts, copy, existing icon wiring |
 
 ## When the environment cannot render
