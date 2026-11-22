@@ -79,11 +79,28 @@ modes, and become a brand. Flat is not the failure mode — a *stock* shape is.
 | illustrative | **I. Character** — a face or creature with one expression | playful · kids · learning · companionship |
 
 Pick **one style from each family** that fits the tone — unless the brief rules a family out, and
-then say why in the concept note. Block both out flat, put them side by side with
-`render.js --compare a.svg b.svg --neighbours <folder>`, and choose on three things only: which
-reads at 29pt, which is further from every leader, which fits the tone. Never break a tie toward
-"more volume" or "more detail" — that habit is exactly what makes a set of generated icons look
-like one illustrator's portfolio.
+then say why in the concept note.
+
+**Compare them at equal fidelity.** A graphic block-out is nearly a finished icon; a block-out of an
+illustrative style is a flat drawing of a 3D thing with its strength — light and material — taken
+away. Comparing those two is rigged toward flat (test runs: eight briefs, eight flat winners, the
+illustrative candidates losing on block-out colours like red on sage at 1.5:1). So before the
+comparison, give each finalist one honest pass in its own idiom: the graphic one gets exact
+geometry; the illustrative one gets the scaffold's light rig, a real material and a tile colour
+chosen for contrast. Then `render.js --compare a.svg b.svg --neighbours <folder>`.
+
+**Decide in this order:**
+1. **29pt is a gate, not a ranking.** Both pass if each is nameable at 29pt among the neighbours.
+   One that fails is out. Between two that pass, "the simpler one reads faster" is not a reason —
+   every flat mark reads faster than every lit object.
+2. **Distance from the leaders.** Style family counts most when the whole category shares one:
+   if every leader is a flat mark, a fine illustrative icon is the most distinct thing in the row
+   (and vice versa).
+3. **Tone.** Warm · homey · cozy · tactile · crafted · nostalgic · kids · premium-object briefs lean
+   illustrative; confident · modern · minimal · utility · fast lean graphic. Say which words decided it.
+
+Never break a tie toward "more volume" — nor toward "fewer pixels". Either habit turns a set of
+icons into one formula; the first made eight lit objects in a row, the second eight flat marks.
 
 **Differentiate on at least two axes** from each leader: style family, hue family, silhouette.
 A flat green disc for a music app differs from Spotify on zero axes that matter; a flat mark on a

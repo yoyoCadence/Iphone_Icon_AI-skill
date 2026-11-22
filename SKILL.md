@@ -46,10 +46,12 @@ this be any app in the category?" must be *no*); **no collision** with a famous 
 Use `references/metaphors.md` for category twists and `references/palettes.md` for colours.
 **Choose the style on purpose — this is where icon sets go monotonous.** Shortlist one style from
 the *graphic* family (H Brand Mark, F Letterform, E Luminous, D Paper, C Glass) and one from the
-*illustrative* family (A Lit Glyph, B Rendered Object, G Scene, I Character); block out both and
-decide with `render.js --compare a.svg b.svg --neighbours <market>` on: 29pt read, distance from
-every leader (differ on at least two of style family, hue family, silhouette), fit with tone. Never
-break a tie toward "more volume". Skip a family only when the brief rules it out, and say why.
+*illustrative* family (A Lit Glyph, B Rendered Object, G Scene, I Character). Bring both to **equal
+fidelity** — the illustrative one gets its light and material, not just a flat silhouette — then
+`render.js --compare a.svg b.svg --neighbours <market>`. Decide: (1) 29pt is a pass/fail gate, not a
+ranking; (2) distance from every leader, where style family weighs most if the category shares one;
+(3) tone. Never break a tie toward "more volume" or toward "fewer pixels" — each produced a
+monoculture in testing. Skip a family only when the brief rules it out, and say why.
 
 The worked examples in `assets/examples/` calibrate quality. When a brief is in an example's
 category, don't reuse the example's *twist, palette or execution* — but keep the category's core sign
