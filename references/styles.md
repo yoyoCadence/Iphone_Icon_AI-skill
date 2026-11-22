@@ -14,12 +14,15 @@ their ratios when you scale.
   the centre or nudged a little, and stops full-tile blurs from fading at the edges. For a group moved
   far off-centre, put the filter on an outer, untransformed group instead.
 - *Bold before beautiful.* Block the silhouette out in flat colours first and check it at 29pt among
-  bright neighbours (`preview.png`); add material only once the flat version already wins. Refinement
+  bright neighbours (`preview.png`); then add the finish that belongs to the style — material for the
+  illustrative styles (A, B, G, I), crisp geometry and at most one gradient for the graphic ones
+  (C, D, E, F, H). Many graphic icons are finished at the block-out. Refinement
   never rescues a subject that is too small or too pale.
 
 Contents
 - Shared building blocks (gradients that don't go muddy, shadow, inner shadow, rim, specular, glow, grain)
-- A. Lit Glyph · B. Rendered Object · C. Liquid Glass · D. Layered Paper · E. Luminous · F. Monogram · G. Horizon Scene
+- Graphic family: H. Brand Mark · F. Letterform · E. Luminous · D. Layered Paper · C. Liquid Glass
+- Illustrative family: A. Lit Glyph · B. Rendered Object · G. Horizon Scene · I. Character
 - Materials cheat-sheet · Anti-patterns
 
 ---
@@ -218,10 +221,16 @@ faint radial haze of the glow colour behind everything so the tile is not flat b
 ```
 A second colour (a warm accent on a cool glow, e.g. a single orange dot) adds life; a third kills it.
 
-## F. Monogram — one letter with a trick
+## F. Letterform — a custom initial, or a wordmark of up to five letters
 
-*When:* the name *is* the brand and no object survives the 29pt test.
+*When:* the name *is* the brand (Babbel, Busuu, Balance build their icon from the initial; Memrise,
+Uber Eats, LINE, Calm use the word itself).
 *Why it fails by default:* a letter centred on a gradient is a placeholder. The trick is mandatory.
+
+Wordmarks: ≤ 5 letters, set tight (tracking −2 to −4%), heavy weight, filling 70–80% of the tile
+width, one or two lines; must still be legible at 60pt — check the 29pt strip honestly, a wordmark
+that turns into a texture there should become its initial. Fonts differ by machine: render and look,
+and prefer a system stack (`-apple-system, 'SF Pro Display', Inter, 'Helvetica Neue', Arial`).
 
 Tricks (pick one): the counter of the letter replaced by a symbol; the letter cut by a diagonal
 band in the background colour; two overlapping translucent copies in two brand hues; a letter
@@ -267,6 +276,47 @@ Rules:
 <path d="M0 760 C 180 700 420 820 640 740 S 900 700 1024 760 V1024 H0 Z" fill="#2E1E4F"/>
 ```
 
+## H. Brand Mark — one ownable symbol, flat
+
+*When:* a consumer app that wants to become a brand. This is what most category leaders use
+(design-process §2a): Spotify's arcs, Telegram's plane, Todoist's stacked ticks, Headspace's disc.
+*Why it works:* one geometric silhouette scales to 20pt, survives iOS dark and tinted modes, and is
+the logo too. *Why it fails:* the symbol is a stock pictogram — a generic bubble, tick or play
+triangle. Flat hides nothing: the silhouette has to carry all of the ownership.
+
+Construction:
+- Build on geometry: circles, 45°/90° cuts, a 64-px module on the 1024 grid; repeat one radius;
+  every curve is an arc or a deliberate bezier. Optical corrections still apply.
+- **One ownership move in the silhouette**: a negative-space cut, two meanings merged (a chat bubble
+  that is also the initial, a fork whose tines are a wave), an unexpected terminal or angle.
+- Two flat colours plus the tile. Optional: one gentle gradient (≤ 8 % lightness) on the tile *or*
+  the mark, not both. Depth, if any, comes from overlapping shapes one value step apart (Microsoft
+  To Do's two-tone tick, Todoist's stack) — never from shadows, rims, grain or specular highlights.
+- Tile: brand colour with a white mark; a near-white tile with a brand-colour mark; or a near-black
+  tile with a colour mark. Mark spans 55–70 % of the tile (a disc mark ~70 %).
+
+```xml
+<linearGradient id="tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFDF9"/><stop offset="1" stop-color="#F3EEE7"/></linearGradient>
+<rect width="1024" height="1024" fill="url(#tile)"/>
+<!-- a disc with one negative-space cut: the cut is the idea, the disc is the brand colour -->
+<mask id="cut"><rect width="1024" height="1024" fill="#fff"/>
+  <path d="M512 512 L790 330 A330 330 0 0 1 842 512 Z" fill="#000"/></mask>
+<circle cx="512" cy="512" r="330" fill="#FF5A3C" mask="url(#cut)"/>
+<!-- two-tone overlap instead of a shadow: the second shape is one value step darker -->
+<path d="M300 560 L440 700 L520 620 L380 480 Z" fill="#D9432A"/>
+```
+
+## I. Character — one face, one expression
+
+*When:* learning, kids, companionship, games — a product with a personality the user talks to.
+*Why it fails:* a generic cute blob, or a near-copy of Duolingo (a green bird with huge round eyes) or
+Headspace (a smiling orange disc). Change species, colour *and* the shape of the eyes.
+
+Rules: the face *is* the silhouette and fills ~70 % of the tile; the eyes carry the expression (two
+eyes, one highlight each, pupils looking slightly up or toward the name); one distinctive feature
+that survives 29pt — an ear shape, a single tuft, a beak or a tooth; one character only, no full body
+unless the pose is the idea. Can be finished flat (graphic) or soft-rendered (illustrative).
+
 ---
 
 ## Materials cheat-sheet
@@ -279,13 +329,19 @@ Rules:
 | glass | translucent fill 0.15–0.35 | gradient edge stroke | soft + colour bleed | refraction offset copy |
 | paper | 1–2 stops, 4–6% | none | short, warm | edge 1px lighter stroke |
 | neon | flat bright | white core stroke | glow instead | haze behind |
+| flat mark (H, F) | none, or one ≤ 8 % gradient | none | none — value-step overlaps | exact geometry |
 
 ## Anti-patterns (each one is a tell that the icon was assembled, not designed)
 
-- A circle or rounded square *inside* the tile as the "icon" — the tile already is the shape.
-- Three or more separate objects; any text longer than two letters; an emoji; a stock pictogram.
+- A plain disc or rounded square used as a *container* for a stock pictogram. (A disc that *is* the
+  mark — Headspace, Telegram — is fine; a white circle holding a generic icon is not.)
+- Three or more separate objects; a wordmark longer than five letters or one that turns to texture
+  at 29pt; an emoji; a stock pictogram, flat or rendered.
 - Gradient that passes through gray (e.g. red→green) or spans > 60° of hue without a mid-stop.
-- Pure `#000`/`#FFF` backgrounds; black shadows on coloured surfaces; highlights pointing different ways.
+- Pure `#000`/`#FFF` tiles behind a weak or small mark (near-white and near-black tiles work for strong
+  graphic marks); black shadows on coloured surfaces; highlights pointing different ways.
+- Material added to a graphic style to make it look "finished" — rims, grain and soft shadows on a
+  brand mark make it look like clip-art, not more premium.
 - Strokes < 28px at 1024; gaps < 24px; detail in the outer 10%.
 - Drop shadow or rounded corners baked into the tile; transparent background (iOS fills it black).
 - A glyph that fills < 45% of the tile ("timid") or > 85% ("cropped").

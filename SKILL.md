@@ -30,15 +30,26 @@ Collect: **name** (as shown under the icon, ≤ 11 chars), **what it does** in o
 `python3 scripts/extract_brand.py <files>`. Fill gaps with stated assumptions instead of
 questions — one line: "Assuming: calm, outdoorsy, no brand colour yet — say so if wrong."
 
-### 2. Concept (write it down before drawing)
-Read `references/design-process.md` §1–3 the first time you use this skill in a session, then write
-the concept note in the format shown there (App/tone · Essence · Idea · Style · Palette · Light).
+### 2. Market, concept, style (write it down before drawing)
+Read `references/design-process.md` §1–3 the first time you use this skill in a session.
+
+**Map the market first.** Name the 3–5 icons a user of this category already has (Spotify, Apple
+Music…) and their language — tile · mark · style. If you can get their PNGs (the user's folder, or an
+App Store lookup when the network allows it), keep them in a folder outside the project and use it
+as `--neighbours` for every render. Most category leaders are flat brand marks; rendered 3D objects
+are the exception (design-process §2a).
+
+Then write the concept note in the format shown there (App/tone · Market · Essence · Idea · Style ·
+Palette · Light).
 The idea must pass three tests: readable at **29pt** from silhouette alone; **ownable** ("could
 this be any app in the category?" must be *no*); **no collision** with a famous icon combo.
 Use `references/metaphors.md` for category twists and `references/palettes.md` for colours.
-Make **two** concepts only when the brief gives nothing beyond a category; otherwise make one and
-keep a runner-up sentence for the hand-off. If you are torn between concepts, block both out and
-judge them side by side with `render.js --compare a.svg b.svg`.
+**Choose the style on purpose — this is where icon sets go monotonous.** Shortlist one style from
+the *graphic* family (H Brand Mark, F Letterform, E Luminous, D Paper, C Glass) and one from the
+*illustrative* family (A Lit Glyph, B Rendered Object, G Scene, I Character); block out both and
+decide with `render.js --compare a.svg b.svg --neighbours <market>` on: 29pt read, distance from
+every leader (differ on at least two of style family, hue family, silhouette), fit with tone. Never
+break a tie toward "more volume". Skip a family only when the brief rules it out, and say why.
 
 The worked examples in `assets/examples/` calibrate quality. When a brief is in an example's
 category, don't reuse the example's *twist, palette or execution* — but keep the category's core sign
@@ -51,8 +62,10 @@ the brand wins: keep the colours and differ in object, composition or which colo
    deployable PNGs untouched), and check the 29pt tile among the bright neighbours in `preview.png`. Solid subjects usually cover ~28–45 % of the tile
    (`validate.py` reports coverage); line/glow glyphs can be thinner if contrast is ≥ 4:1.
    Refinement never rescues a subject that is too small or too pale — fix that here.
-2. **Then add material** with the recipe for the chosen style in `references/styles.md`.
-   Styles A/B/E/F start from `assets/scaffold.svg` (lighting rig pre-wired); C/D/G start from their
+2. **Then finish it by the style's own standard** (`references/styles.md`): graphic styles get exact
+   geometry, clean joins and at most one gradient — no shadows, rims or grain, and many are done at
+   the block-out; illustrative styles get the full material treatment.
+   Styles A/B/E start from `assets/scaffold.svg` (lighting rig pre-wired); the others start from their
    recipe and reuse only the scaffold's filters. For a stroke whose width or colour must change along
    its length (trail, orbit, brush, swoosh), generate it with `scripts/ribbon.py`.
 
@@ -60,8 +73,10 @@ Rules that come from how iOS and SVG behave — not stylistic preferences:
 - Full-bleed **opaque square**; no rounded corners, no outer shadow, no transparent margin
   (iOS masks the squircle and composites over black).
 - Main subject inside the centre ~62 % (x,y ≈ 195…830); corners carry only background.
-- Glyph strokes ≥ 28 px, gaps ≥ 24 px at 1024; text only for a monogram (≤ 2 letters, weight ≥ 700).
-- One light source (top-left unless the scene has its own sun); tinted shadows, never black.
+- Glyph strokes ≥ 28 px, gaps ≥ 24 px at 1024; text only in style F (an initial, or a wordmark of
+  ≤ 5 letters that is still legible at 60pt).
+- Illustrative styles: one light source (top-left unless the scene has its own sun); tinted shadows,
+  never black. Graphic styles have no light source.
 - Filter regions cover the canvas: `filterUnits="userSpaceOnUse" x="-256" y="-256" width="1536" height="1536"`.
   Percentage regions clip stroked and thin shapes into hard edges.
 - Colour discipline: two hues in the tile, one hero object/glyph, at most one secondary accent.
@@ -120,7 +135,10 @@ create `./<app-slug>-icon/` only when the current folder is unrelated.
 
 ## Quality bar (what "done" means)
 - The 29pt tile is nameable and holds its own next to the bright neighbours on both wallpapers.
-- The 1024 hero shows one consistent light and a real material, with no clipped edges in `grid.png`.
+- The 1024 hero meets its style's finish standard (graphic: exact geometry, no stray effects;
+  illustrative: one consistent light, a real material), with no clipped edges in `grid.png`.
+- Next to the category's real leaders it differs from each on at least two of style family, hue
+  family and silhouette.
 - The icon could not be swapped with a competitor's without someone noticing.
 - validate.py shows no ✗; the only ⚠ left are ones you can defend in a sentence; the project's own
   icon tests (if any) pass.
@@ -140,6 +158,7 @@ create `./<app-slug>-icon/` only when the current folder is unrelated.
 | Script | Does |
 |---|---|
 | `scripts/render.js <svg> --out <dir> [--preview-dir <dir>] [--draft] --label <name> [--grid] [--sizes 167,152]` | SVG → PNG set + home-screen preview among bright neighbours (Playwright/Chromium); `--draft` for block-outs; warns on heavy files |
+| `scripts/render.js … --neighbours <folder>` | use real icons (e.g. the category's leaders) as neighbours in preview.png and compare.png |
 | `scripts/render.js --compare a.svg b.svg [c.svg d.svg] --out icon-design` | variants side by side at hero, 60pt and 29pt among bright neighbours |
 | `scripts/validate.py <png> [--json]` | transparency, subject coverage, centre of mass, corner & maskable intrusion, contrast, tonal depth; scene-aware |
 | `scripts/inject.py <html> --name [--theme --bg --web-path --start-url --status-bar --no-standalone --force --print --out --snippet]` | head tags + manifest; refuses to rewire an already-wired page; relative URLs by default; idempotent |

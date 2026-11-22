@@ -39,7 +39,15 @@ off the default (`palettes.md`), not both at once.
   they look like they are sliding out of the tile.
 - Nothing important within 10% of the edge; corners hold only background.
 
-## 5. Light and material (hero)
+## 5. Finish (hero) — judged by the style's own standard
+
+**Graphic styles (H, F, E, D, C):** are the curves exact and the joins clean? Is there one
+repeated radius, consistent stroke weight, deliberate negative space? Is every colour doing a job
+(two flat colours plus the tile, one gradient at most)? Remove any shadow, rim, grain or specular
+that crept in — on a brand mark they read as clip-art, not as quality. A graphic icon can be
+finished at the block-out.
+
+**Illustrative styles (A, B, G, I):**
 - One light source, top-left. Highlights on top-left faces, rim on top-left edges, inner shadow
   and contact shadow toward bottom-right. Any element that disagrees breaks the illusion.
 - Shadows tinted (darker, more saturated version of the surface), never black; highlights slightly
@@ -58,8 +66,10 @@ by surviving the 29pt test; otherwise delete it. Grain/sheen must be invisible a
 | You see | Do |
 |---|---|
 | "nice but could be any app" | silhouette twist (notch/cut/asymmetry) or a specific object instead of a pictogram |
-| flat sticker on a gradient | inner shadow, contact shadow, rim; 3-stop fill on the glyph |
-| clip-art | replace flat fills with the Rendered Object recipe; show the object slightly from above |
+| an illustrative object looks like a flat sticker | inner shadow, contact shadow, rim; 3-stop fill on the glyph |
+| a graphic mark looks like clip-art | the problem is the shape, not the finish: give the silhouette one ownership move (cut, merge, negative space), exact geometry, fewer pieces — do not add shadows |
+| every draft comes out as a lit 3D object | you defaulted to the illustrative family — block out a graphic-family alternative and compare among the market neighbours |
+| looks like a category leader | change at least two of: style family, hue family, silhouette |
 | muddy gradient | mid-stop; shift top toward yellow, bottom toward blue/violet |
 | glyph too small / timid | scale group about (512,512) by 1.12–1.2; a pale subject also needs a darker tile behind it |
 | looks fine alone, weak next to the neighbours | bigger silhouette, one stronger value contrast, fewer mid-tones |
@@ -75,7 +85,8 @@ by surviving the 29pt test; otherwise delete it. Grain/sheen must be invisible a
 
 ## When to stop
 
-Stop when: the 29pt tile is instantly nameable, the neighbour panels show it holding its own
-without shouting, the hero shows one consistent light and a real material, and the validator
+Stop when: the 29pt tile is instantly nameable, the neighbour panels (ideally the real category
+leaders, `--neighbours`) show it holding its own without shouting or looking like one of them, the
+hero meets its style's finish standard, and the validator
 has no `✗`. Two render rounds is typical; a third is fine; a fifth means the concept is wrong —
 go back to the metaphor ladder instead of polishing.
