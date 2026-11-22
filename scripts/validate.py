@@ -158,9 +158,9 @@ def analyse(path: Path):
             findings.append(("warn", f"glyph spans {ext*100:.0f}% of the icon — it touches the mask (iOS crops corners, Android a circle)"))
         else:
             findings.append(("ok", f"glyph spans {ext*100:.0f}% of the icon (bounding box)"))
-        note = (f"subject covers {coverage*100:.0f}% of the tile area — reference: solid objects read best at ~28–45%, "
-                "line/glow glyphs at ~10–20% with contrast ≥ 4:1. The bounding box can look big while the subject is small; "
-                "compare against the bright neighbours in preview.png")
+        note = (f"subject covers {coverage*100:.0f}% of the tile area — reference: 20 App Store category leaders measure "
+                "15–30% (median 20%; heavy discs like Spotify or Telegram reach 45–55%); a rendered object usually needs 25–40%, "
+                "a thin line/glow glyph 10–20% with contrast ≥ 4:1. Judge it against the neighbours in preview.png")
         if scene:
             findings.append(("ok", f"subject coverage {coverage*100:.0f}% (background texture inflates this for scenes; "
                                    "judge the focal shape by eye)"))

@@ -59,8 +59,9 @@ the brand wins: keep the colours and differ in object, composition or which colo
 
 ### 3. Build the SVG — bold first, beautiful second
 1. **Block out** the silhouette in flat colours, render it with `--draft` (step 4; previews only,
-   deployable PNGs untouched), and check the 29pt tile among the bright neighbours in `preview.png`. Solid subjects usually cover ~28–45 % of the tile
-   (`validate.py` reports coverage); line/glow glyphs can be thinner if contrast is ≥ 4:1.
+   deployable PNGs untouched), and check the 29pt tile among the bright neighbours in `preview.png`. Category leaders' marks cover 15–30 % of the tile
+   (median 20 %); rendered objects usually need 25–40 %; line/glow glyphs can be thinner if
+   contrast is ≥ 4:1 (`validate.py` reports coverage).
    Refinement never rescues a subject that is too small or too pale — fix that here.
 2. **Then finish it by the style's own standard** (`references/styles.md`): graphic styles get exact
    geometry, clean joins and at most one gradient — no shadows, rims or grain, and many are done at
