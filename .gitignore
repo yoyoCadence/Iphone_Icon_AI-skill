@@ -3,3 +3,5 @@ node_modules/
 evals/results/
 *-workspace/
 .DS_Store
+__pycache__/
+*.pyc
