@@ -48,10 +48,12 @@ Use `references/metaphors.md` for category twists and `references/palettes.md` f
 the *graphic* family (H Brand Mark, F Letterform, E Luminous, D Paper, C Glass) and one from the
 *illustrative* family (A Lit Glyph, B Rendered Object, G Scene, I Character). Bring both to **equal
 fidelity** — the illustrative one gets its light and material, not just a flat silhouette — then
-`render.js --compare a.svg b.svg --neighbours <market>`. Decide: (1) 29pt is a pass/fail gate, not a
-ranking; (2) distance from every leader, where style family weighs most if the category shares one;
-(3) tone. Never break a tie toward "more volume" or toward "fewer pixels" — each produced a
-monoculture in testing. Skip a family only when the brief rules it out, and say why.
+`render.js --compare a.svg b.svg --neighbours <market>`. Decide with two gates, then tone:
+(1) gate — nameable at 29pt; (2) gate — differs from every leader on at least two of style family,
+hue family, silhouette; (3) between candidates that pass both, **tone decides** (name the words).
+Passing a gate by more is not a reason to win. Never break a tie toward "more volume", "fewer
+pixels" or "more different" — each produced a monoculture in testing. Skip a family only when the
+brief rules it out, and say why.
 
 The worked examples in `assets/examples/` calibrate quality. When a brief is in an example's
 category, don't reuse the example's *twist, palette or execution* — but keep the category's core sign

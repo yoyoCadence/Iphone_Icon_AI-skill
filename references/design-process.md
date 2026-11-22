@@ -89,18 +89,26 @@ comparison, give each finalist one honest pass in its own idiom: the graphic one
 geometry; the illustrative one gets the scaffold's light rig, a real material and a tile colour
 chosen for contrast. Then `render.js --compare a.svg b.svg --neighbours <folder>`.
 
-**Decide in this order:**
-1. **29pt is a gate, not a ranking.** Both pass if each is nameable at 29pt among the neighbours.
-   One that fails is out. Between two that pass, "the simpler one reads faster" is not a reason —
-   every flat mark reads faster than every lit object.
-2. **Distance from the leaders.** Style family counts most when the whole category shares one:
-   if every leader is a flat mark, a fine illustrative icon is the most distinct thing in the row
-   (and vice versa).
-3. **Tone.** Warm · homey · cozy · tactile · crafted · nostalgic · kids · premium-object briefs lean
-   illustrative; confident · modern · minimal · utility · fast lean graphic. Say which words decided it.
+**Decide in this order — two gates, then tone:**
+1. **Gate: 29pt.** Each candidate must be nameable at 29pt among the neighbours; one that fails is
+   out. Between two that pass, "the simpler one reads faster" is not a reason — every flat mark
+   reads faster than every lit object.
+2. **Gate: distance.** Each candidate must differ from *every* leader on at least two of style
+   family, hue family and silhouette; one that doesn't is out (or goes back for a new hue or
+   silhouette). Passing is enough — more distance is not a reason to win. Ranking on style family
+   rigs the choice: in a category of flat marks every illustrative candidate "wins" automatically
+   (a test run picked a retro cassette for a brief that asked for rebellious and modern).
+3. **Tone decides between candidates that passed both gates.** Warm · homey · cozy · tactile ·
+   crafted · nostalgic · kids · premium-object lean illustrative; confident · modern · minimal ·
+   precise · utility · fast · rebellious lean graphic. Name the words that decided it. Only if the
+   tone is genuinely neutral, prefer the candidate whose style family is rarer among the leaders.
 
-Never break a tie toward "more volume" — nor toward "fewer pixels". Either habit turns a set of
-icons into one formula; the first made eight lit objects in a row, the second eight flat marks.
+Never break a tie toward "more volume", "fewer pixels" or "more different" — each habit turned a
+set of test icons into one formula (eight lit objects in a row; then eight flat marks; then a
+cassette chosen over the brief's own tone). Under equal fidelity, the warm home-cooking brief chose a
+rendered pot and the minimal rain-alert brief a flat mark, each decided by tone; the music run's own
+log shows its flat candidate passed both gates and won on tone, so the gates-then-tone order would
+have kept it (inferred from that log, not re-run).
 
 **Differentiate on at least two axes** from each leader: style family, hue family, silhouette.
 A flat green disc for a music app differs from Spotify on zero axes that matter; a flat mark on a

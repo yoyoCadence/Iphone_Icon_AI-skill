@@ -72,6 +72,8 @@ delivers. One to three material rounds is normal — that is the process working
 | `python3 scripts/extract_brand.py index.html styles.css` | title, colours, fonts, copy, existing icon wiring |
 
 ### Tested
+- **Market benchmark** — the skill tested against the real App Store leaders of eight categories;
+  how its style rule went from all-3D to all-flat to choosing by tone. → [docs/market-benchmark.md](docs/market-benchmark.md)
 - **Showcase** — eight icons from fresh runs, unretouched, scored honestly (6/10 to 8/10) with the
   skill's remaining bias named. → [docs/showcase.md](docs/showcase.md)
 - **Evals** — three briefs, with vs. without the skill, three iterations; the first lost one case
@@ -155,6 +157,7 @@ Claude 會寫概念筆記 → 先用平塗色塊打底、在 29pt 和搶眼鄰�
 5. **交付**：`inject.py` 寫入 head 區塊與 manifest，保留頁面原有設定，依部署方式選對網址；已經接好的頁面它會拒絕覆蓋。
 
 ### 實測
+- **市場對照**：以八個類別的 App Store 真實龍頭為對照測試 skill；風格規則從「全是 3D」到「全是扁平」，再到「依調性選擇」的過程。→ [docs/market-benchmark.md](docs/market-benchmark.md)
 - **作品展示**：八個由全新執行產出、未經修圖的 icon，逐一誠實評分（6～8 分），並寫明 skill 目前的系統性偏差。→ [docs/showcase.md](docs/showcase.md)
 - **評測**：三個情境、有／無 skill 對照、三輪迭代；第一輪曾輸 1 場（主畫面尺寸下太不醒目），修正過程有完整紀錄，最新版本在每個情境都勝出或持平；觸發測試 20 個真實與易混淆查詢 60/60 全對。→ [docs/evals.md](docs/evals.md)
 - **真實專案實測**：一個有自己 icon 建置、e2e icon 測試與 service worker 的 PWA；新設計通過該專案自己的測試，而這次實測也揪出並修正了 skill 最具破壞性的幾個 bug。→ [docs/field-test-orbit.md](docs/field-test-orbit.md)
