@@ -26,7 +26,8 @@ treat an existing icon's colours and motif as brand equity to evolve unless the 
 
 ### 1. Brief (≤ 2 minutes)
 Collect: **name** (as shown under the icon, ≤ 11 chars), **what it does** in one sentence,
-**tone** (three adjectives), **existing colours/logo**, **audience**. For an HTML/CSS project run
+**tone** (three adjectives, read from the name, the UI and the audience — a README's
+"rigorous, auditable" describes the code, not the brand), **existing colours/logo**, **audience**. For an HTML/CSS project run
 `python3 scripts/extract_brand.py <files>`. Fill gaps with stated assumptions instead of
 questions — one line: "Assuming: calm, outdoorsy, no brand colour yet — say so if wrong."
 
@@ -48,9 +49,15 @@ Use `references/metaphors.md` for category twists and `references/palettes.md` f
 the *graphic* family (H Brand Mark, F Letterform, E Luminous, D Paper, C Glass) and one from the
 *illustrative* family (A Lit Glyph, B Rendered Object, G Scene, I Character). Bring both to **equal
 fidelity** — the illustrative one gets its light and material, not just a flat silhouette — then
-`render.js --compare a.svg b.svg --neighbours <market>`. Decide with two gates, then tone:
-(1) gate — nameable at 29pt; (2) gate — differs from every leader on at least two of style family,
-hue family, silhouette; (3) between candidates that pass both, **tone decides** (name the words).
+`render.js --compare a.svg b.svg --neighbours <market>`. Decide with three gates, then tone
+(design-process §2b has the detail):
+(1) gate — nameable at 29pt, and at 60pt it looks like the right *kind* of app (a game looks like a
+game); (2) gate, graphic candidates — **one silhouette, not a pictogram**: an idea that needs three
+or more separately drawn parts goes to the illustrative candidate, unless the brand's own UI is flat
+illustration; (3) gate — differs from every leader on at least two of style family, hue family
+(the whole icon's dominant colours, not just the tile), silhouette; (4) between candidates that pass,
+**tone decides** (name the words) — and **brand equity outranks tone**: a candidate that gave up the
+brand colour to pass gate 3 loses to one that kept it.
 Passing a gate by more is not a reason to win. Never break a tie toward "more volume", "fewer
 pixels" or "more different" — each produced a monoculture in testing. Skip a family only when the
 brief rules it out, and say why.

@@ -15,7 +15,7 @@ Get these five facts. If the user gave an HTML/CSS file or URL, run
 |---|---|---|
 | **Name** (as it will appear under the icon) | ≤ 11 characters show without truncation; the icon must agree with it | use the `<title>` |
 | **What it does, in one sentence** | source of the metaphor | infer from the page copy |
-| **Tone: three adjectives** (e.g. calm · precise · friendly) | decides style and palette | infer from typography and colours of the page |
+| **Tone: three adjectives** (e.g. calm · precise · friendly) | decides style and palette | infer from the name, the page's typography and colours, the existing icon and the audience — not from a README's description of method |
 | **Existing colours / logo** | brand continuity beats novelty | derive from `theme-color` or the dominant chromatic colour |
 | **Audience & context** (kids? professionals? night use?) | legibility and palette temperature | assume general public |
 
@@ -89,26 +89,47 @@ comparison, give each finalist one honest pass in its own idiom: the graphic one
 geometry; the illustrative one gets the scaffold's light rig, a real material and a tile colour
 chosen for contrast. Then `render.js --compare a.svg b.svg --neighbours <folder>`.
 
-**Decide in this order — two gates, then tone:**
-1. **Gate: 29pt.** Each candidate must be nameable at 29pt among the neighbours; one that fails is
-   out. Between two that pass, "the simpler one reads faster" is not a reason — every flat mark
-   reads faster than every lit object.
-2. **Gate: distance.** Each candidate must differ from *every* leader on at least two of style
+**Decide in this order — three gates, then tone:**
+1. **Gate: read.** Each candidate must be nameable at 29pt among the neighbours, and at 60pt a
+   stranger must guess the right *kind* of app: a game has to look like a game, a kids' app like a
+   kids' app. One that fails is out. Between two that pass, "the simpler one reads faster" is not
+   a reason — every flat mark reads faster than every lit object.
+2. **Gate: mark, not pictogram (graphic candidates only).** A flat candidate must be *one
+   silhouette*: a letter, a symbol, or parts fused into one outline, with any detail cut into it
+   as negative space. Count the separately drawn parts the idea needs to read. Three or more — a car
+   body plus tyres, rollers and a wall; an iceberg tip plus three facets; a ticket plus a stub plus
+   a bowl — and the flat version is a toolbar pictogram, not a brand mark: it is out, and the idea
+   belongs to the illustrative candidate (or goes back to be reduced to one silhouette). Exception:
+   the brand's own visual language is flat illustration (a comic ink-line UI) and the candidate is
+   drawn in it.
+3. **Gate: distance.** Each candidate must differ from *every* leader on at least two of style
    family, hue family and silhouette; one that doesn't is out (or goes back for a new hue or
-   silhouette). Passing is enough — more distance is not a reason to win. Ranking on style family
-   rigs the choice: in a category of flat marks every illustrative candidate "wins" automatically
-   (a test run picked a retro cassette for a brief that asked for rebellious and modern).
-3. **Tone decides between candidates that passed both gates.** Warm · homey · cozy · tactile ·
-   crafted · nostalgic · kids · premium-object lean illustrative; confident · modern · minimal ·
-   precise · utility · fast · rebellious lean graphic. Name the words that decided it. Only if the
-   tone is genuinely neutral, prefer the candidate whose style family is rarer among the leaders.
+   silhouette). **Hue family is what dominates the whole icon by area — tile and mark together —
+   not the tile alone:** a blue tile does not share a hue with Mario Kart Tour, whose icon reads
+   red. Passing is enough — more distance is not a reason to win. Ranking on style family rigs the
+   choice: in a category of flat marks every illustrative candidate "wins" automatically (a test run
+   picked a retro cassette for a brief that asked for rebellious and modern).
+4. **Tone decides between candidates that passed every gate.** Warm · homey · cozy · tactile ·
+   crafted · nostalgic · kids · playful-game · premium-object lean illustrative; confident · modern ·
+   minimal · precise · utility · fast · rebellious lean graphic. Name the words that decided it.
+   - **Read tone from what the user sees, not from how the code works:** the name's promise
+     (*Forge* is heat, *GoGoGo* is energy), the UI and its theme, the existing icon, the audience.
+     A README's account of method — rigorous, auditable, reproducible, sober — describes the
+     engineering; every serious tool says it, so it is not a tone. If a README is all you have, say
+     so in the concept note and treat the tone as neutral.
+   - **Brand equity outranks tone:** if one candidate kept the brand's colour or motif and the
+     other had to give it up to pass the distance gate, keep the one that kept the brand.
+   - Only if the tone is genuinely neutral, prefer the candidate whose style family is rarer among
+     the leaders.
 
 Never break a tie toward "more volume", "fewer pixels" or "more different" — each habit turned a
 set of test icons into one formula (eight lit objects in a row; then eight flat marks; then a
 cassette chosen over the brief's own tone). Under equal fidelity, the warm home-cooking brief chose a
-rendered pot and the minimal rain-alert brief a flat mark, each decided by tone; the music run's own
-log shows its flat candidate passed both gates and won on tone, so the gates-then-tone order would
-have kept it (inferred from that log, not re-run).
+rendered pot and the minimal rain-alert brief a flat mark, each decided by tone. Then ten real
+projects under the two-gate rule chose flat eight times in nine: the ≠ sign, the folded M and the
+allocation ring were right, but an anvil, a top-down race car, a lunch ticket and an iceberg came out
+as multi-part flat pictograms whose rendered runners-up were better, two of them decided by "sober"
+and "rigorous" lifted from a README. Gates 1–2 and the tone sources above are the fix.
 
 **Differentiate on at least two axes** from each leader: style family, hue family, silhouette.
 A flat green disc for a music app differs from Spotify on zero axes that matter; a flat mark on a
