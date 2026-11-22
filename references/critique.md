@@ -68,6 +68,9 @@ by surviving the 29pt test; otherwise delete it. Grain/sheen must be invisible a
 | "nice but could be any app" | silhouette twist (notch/cut/asymmetry) or a specific object instead of a pictogram |
 | an illustrative object looks like a flat sticker | inner shadow, contact shadow, rim; 3-stop fill on the glyph |
 | a graphic mark looks like clip-art | the problem is the shape, not the finish: give the silhouette one ownership move (cut, merge, negative space), exact geometry, fewer pieces — do not add shadows |
+| a flat icon looks like a toolbar / settings glyph, not an app | it is a multi-part pictogram: fuse it into one silhouette, or switch to the illustrative candidate and render the object |
+| a game icon looks like a utility | the read gate failed: games need character, motion or a rendered object — not a flat diagram of the subject |
+| flat parts accidentally form another symbol (peace sign, Y, cross) | seams and gaps read as lines at 60pt — remove a seam or merge two parts |
 | every draft comes out as a lit 3D object | you defaulted to the illustrative family — block out a graphic-family alternative and compare among the market neighbours |
 | looks like a category leader | change at least two of: style family, hue family, silhouette |
 | muddy gradient | mid-stop; shift top toward yellow, bottom toward blue/violet |

@@ -282,7 +282,11 @@ Rules:
 (design-process §2a): Spotify's arcs, Telegram's plane, Todoist's stacked ticks, Headspace's disc.
 *Why it works:* one geometric silhouette scales to 20pt, survives iOS dark and tinted modes, and is
 the logo too. *Why it fails:* the symbol is a stock pictogram — a generic bubble, tick or play
-triangle. Flat hides nothing: the silhouette has to carry all of the ownership.
+triangle — or it is an object assembled from several flat parts (a car with its tyres and bumpers,
+a ticket with a stub, a bowl and chopsticks), which reads as a toolbar glyph rather than a brand.
+Flat hides nothing: the silhouette has to carry all of the ownership. If the idea needs three or
+more separately drawn parts to read, either reduce it to one silhouette or render it (illustrative
+family) — see the mark-not-pictogram gate in design-process §2b.
 
 Construction:
 - Build on geometry: circles, 45°/90° cuts, a 64-px module on the 1024 grid; repeat one radius;
