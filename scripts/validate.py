@@ -158,9 +158,9 @@ def analyse(path: Path):
             findings.append(("warn", f"glyph spans {ext*100:.0f}% of the icon — it touches the mask (iOS crops corners, Android a circle)"))
         else:
             findings.append(("ok", f"glyph spans {ext*100:.0f}% of the icon (bounding box)"))
-        note = (f"subject covers {coverage*100:.0f}% of the tile area — reference: solid objects read best at ~28–45%, "
-                "line/glow glyphs at ~10–20% with contrast ≥ 4:1. The bounding box can look big while the subject is small; "
-                "compare against the bright neighbours in preview.png")
+        note = (f"subject covers {coverage*100:.0f}% of the tile area — reference: 20 App Store category leaders measure "
+                "15–30% (median 20%; heavy discs like Spotify or Telegram reach 45–55%); a rendered object usually needs 25–40%, "
+                "a thin line/glow glyph 10–20% with contrast ≥ 4:1. Judge it against the neighbours in preview.png")
         if scene:
             findings.append(("ok", f"subject coverage {coverage*100:.0f}% (background texture inflates this for scenes; "
                                    "judge the focal shape by eye)"))
@@ -242,8 +242,8 @@ def analyse(path: Path):
     significant = [c for c, _ in counts if c / (n * n) > 0.004]
     metrics["significant_colours"] = len(significant)
     if len(significant) < 4:
-        findings.append(("warn", f"only {len(significant)} significant colours — expected for a flat block-out; for the final "
-                                 "icon add gradient, light and shadow or it reads as clip-art"))
+        findings.append(("ok", f"{len(significant)} significant colours — flat: right for a graphic style (brand mark, "
+                               "letterform) or a block-out; an illustrative style needs gradient, light and shadow"))
     else:
         findings.append(("ok", f"{len(significant)} significant colours (tonal depth present)"))
 
@@ -252,7 +252,8 @@ def analyse(path: Path):
     if bg_l < 0.01:
         findings.append(("warn", "background is near pure black; iOS dark wallpapers swallow it — try a very dark hue (#0b0f1e-ish) with a lit glyph"))
     if bg_l > 0.9 and sat_bg < 0.1:
-        findings.append(("warn", "background is near pure white; on light wallpapers the icon loses its edge — tint it or add a gradient"))
+        findings.append(("ok", "near-white tile — works for a strong, saturated mark (DoorDash, Headspace, Telegram do it); "
+                               "keep the mark large and the tile very slightly tinted, and check the light-wallpaper panel"))
 
     return findings, metrics
 

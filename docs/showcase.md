@@ -27,5 +27,7 @@ from the field test, now live in that app).
 - **Systematic bias:** all eight use the same formula — one centred, softly lit 3D object on a
   gradient tile. They look like one illustrator's set. Styles C–E (glass, paper, luminous) and bold
   flat graphics were never chosen, even where the tone allowed them. This is the next thing to fix:
-  make the style choice argue against the default, not drift to it.
+  make the style choice argue against the default, not drift to it. → Done in
+  [market-benchmark.md](market-benchmark.md): tested against real App Store leaders, three rounds of
+  the style rule, and the bias each round revealed.
 - **Cost:** 150–190 k tokens and 6–11 minutes per icon (block-out plus three material rounds).

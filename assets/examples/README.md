@@ -1,6 +1,6 @@
 # Worked examples
 
-Four icons produced with this skill's own pipeline, each with the concept note that preceded the
+Five icons produced with this skill's own pipeline, each with the concept note that preceded the
 SVG. They exist to calibrate the quality bar and to show one recipe each — copy the *approach*,
 never the icon. **If a brief falls in one of these categories (surf/ocean, budgeting/coins,
 terminals, meditation), don't reuse the example's twist, palette or execution** — test runs showed
@@ -56,3 +56,17 @@ Light: top-left edge highlights on each pane; colour comes from under the glass
 ```
 What to learn: glass only works over colour; the refraction copy (same shape, offset 10 px, 16 %
 opacity) and the gradient edge stroke are what sell translucency.
+
+## Tempo — music discovery · style H (brand mark, graphic family)
+```
+Tone: energetic · young · a little rebellious     Essence: every swing, a new artist
+Market: flat marks on black, white or one hot colour (Spotify, SoundCloud, Tidal, YouTube Music);
+        red, orange and green taken; discs and notes taken → violet/yellow and a new silhouette are open
+Idea: a metronome whose arm is flung out through its own side — a cut-out slot inside the body,
+      solid outside (figure-ground switch as the ownership move)
+Palette: tile #5C2FF4 → #4A20D8 · mark #FFE53B · no accent, no light source
+```
+What to learn: a flat mark is finished when its geometry is exact (64-px module, one repeated corner
+radius), not when it has shadows; the ownership lives in the silhouette. Made in the market benchmark
+(`docs/market-benchmark.md`) — the only graphic-family example here, added because four illustrative
+examples were themselves pulling runs toward lit objects.

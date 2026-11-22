@@ -37,6 +37,8 @@ const HELP = `render.js — render an icon SVG to iPhone/PWA PNG sizes + a home-
   --sizes <list>     comma list of extra PNG sizes (default adds none beyond 1024,512,192,180)
   --no-preview       skip preview.png
   --grid             also write grid.png (icon with the layout grid overlaid)
+  --neighbours <p>   use real icons as the neighbours in preview.png and compare.png: a folder of
+                     PNG/JPEG files (e.g. the category's leading apps) or a comma-separated list
   --preview-dir <d>  write icon-1024.png, preview.png and grid.png here instead of --out
                      (keeps design files out of a deployed folder such as public/icons)
   --draft            block-out / work-in-progress: render only icon-1024 + preview (+grid) into the
@@ -80,6 +82,7 @@ function parseArgs(argv) {
     else if (a === '--no-preview') args.preview = false;
     else if (a === '--grid') args.grid = true;
     else if (a === '--preview-dir') args.previewDir = argv[++i];
+    else if (a === '--neighbours' || a === '--neighbors') args.neighbours = argv[++i];
     else if (a === '--quiet') args.quiet = true;
     else if (a === '--help' || a === '-h') { console.log(HELP); process.exit(0); }
     else if (a.startsWith('-')) die(`unknown option ${a}\n${HELP}`);
@@ -172,7 +175,27 @@ async function renderSize(browser, svgText, size, file) {
   await page.close();
 }
 
-function previewHtml(pngDataUrl, label) {
+/** Real neighbour icons: a folder of images or a comma-separated list → [{ url, name }]. */
+function loadNeighbours(spec) {
+  if (!spec) return [];
+  let files = [];
+  if (fs.existsSync(spec) && fs.statSync(spec).isDirectory()) {
+    files = fs.readdirSync(spec).filter((f) => /\.(png|jpe?g|webp)$/i.test(f)).sort().map((f) => path.join(spec, f));
+  } else {
+    files = String(spec).split(',').map((f) => f.trim()).filter(Boolean);
+  }
+  const out = [];
+  for (const f of files) {
+    if (!fs.existsSync(f)) { console.warn(`render.js: neighbour not found: ${f}`); continue; }
+    const buf = fs.readFileSync(f);
+    const mime = buf[0] === 0x89 ? 'image/png' : buf[0] === 0xff ? 'image/jpeg' : 'image/webp';
+    const name = path.basename(f).replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 14);
+    out.push({ url: `data:${mime};base64,${buf.toString('base64')}`, name });
+  }
+  return out;
+}
+
+function previewHtml(pngDataUrl, label, real = []) {
   // Neighbours look like a real home screen: saturated tiles, bold white glyphs. Muted grey
   // placeholders flatter a timid icon; these don't. Generic shapes only — no real app's icon.
   const G = {
@@ -190,6 +213,10 @@ function previewHtml(pngDataUrl, label) {
     ['#ffd60a', '#f4a100', G.dot, 'Spot'],
   ];
   const placeholders = (n) => Array.from({ length: n }, (_, i) => {
+    if (real.length) {
+      const r = real[i % real.length];
+      return `<div class="cell"><div class="icon sq"><img src="${r.url}" alt=""></div><div class="lbl">${r.name}</div></div>`;
+    }
     const [a, b, glyph, name] = neighbours[i % neighbours.length];
     return `<div class="cell"><div class="icon sq" style="background:linear-gradient(180deg,${a},${b})">
       <svg viewBox="0 0 120 120" width="100%" height="100%">${glyph}</svg></div><div class="lbl">${name}</div></div>`;
@@ -273,7 +300,7 @@ async function svgToDataUrl(browser, svgText, size) {
   return 'data:image/png;base64,' + buf.toString('base64');
 }
 
-async function renderCompare(browser, files, label, file) {
+async function renderCompare(browser, files, label, file, real = []) {
   const variants = [];
   // label each variant with the shortest path suffix that tells it apart from the others
   const parts = files.map((f) => path.resolve(f).split(path.sep).filter(Boolean));
@@ -295,9 +322,10 @@ async function renderCompare(browser, files, label, file) {
   const nb = (bg, glyph) => `<div class="i sq" style="width:104px;height:104px;background:${bg}"><svg viewBox="0 0 120 120" width="100%" height="100%">${glyph}</svg></div>`;
   const ring = '<circle cx="60" cy="60" r="30" fill="none" stroke="#fff" stroke-width="13"/>';
   const bolt = '<path d="M66 22 L36 66 H58 L52 98 L84 52 H62 Z" fill="#fff"/>';
+  const rn = (i) => (real.length ? tile(real[i % real.length].url, 104) : null);
   const col = (v) => `<div class="col"><div class="h">${tile(v.url, 300)}</div><div class="n">${v.name}</div>
-    <div class="p dark">${nb('linear-gradient(180deg,#0a84ff,#0056d6)', ring)}${tile(v.url, 104)}${nb('linear-gradient(180deg,#ff9f0a,#e8590c)', bolt)}</div>
-    <div class="p light">${nb('linear-gradient(180deg,#34c759,#1f9a3e)', ring)}${tile(v.url, 104)}${tile(v.url, 58)}${tile(v.url, 40)}</div></div>`;
+    <div class="p dark">${rn(0) || nb('linear-gradient(180deg,#0a84ff,#0056d6)', ring)}${tile(v.url, 104)}${rn(1) || nb('linear-gradient(180deg,#ff9f0a,#e8590c)', bolt)}</div>
+    <div class="p light">${rn(2) || nb('linear-gradient(180deg,#34c759,#1f9a3e)', ring)}${tile(v.url, 104)}${tile(v.url, 58)}${tile(v.url, 40)}</div></div>`;
   const html = `<!doctype html><html><head><meta charset="utf-8"><style>
   body{margin:0;background:#0e0e11;font-family:-apple-system,"SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;color:#fff}
   .w{display:flex;gap:28px;padding:30px}.col{display:flex;flex-direction:column;align-items:center;gap:16px;width:380px}
@@ -312,10 +340,10 @@ async function renderCompare(browser, files, label, file) {
   await page.close();
 }
 
-async function renderPreview(browser, masterPng, label, file) {
+async function renderPreview(browser, masterPng, label, file, real = []) {
   const dataUrl = 'data:image/png;base64,' + fs.readFileSync(masterPng).toString('base64');
   const page = await browser.newPage({ viewport: { width: 1800, height: 1000 }, deviceScaleFactor: 1 });
-  await page.setContent(previewHtml(dataUrl, label), { waitUntil: 'load' });
+  await page.setContent(previewHtml(dataUrl, label, real), { waitUntil: 'load' });
   await page.evaluate(() => document.fonts && document.fonts.ready);
   await page.waitForTimeout(80);
   await shot(page, { path: file, fullPage: true });
@@ -353,7 +381,7 @@ async function main() {
     if (!pw) die('--compare needs Playwright (npm i -D playwright && npx playwright install chromium)');
     fs.mkdirSync(args.out, { recursive: true });
     const browser = await launchBrowser(pw);
-    try { await renderCompare(browser, args.compare, args.label, path.join(args.out, 'compare.png')); } finally { await browser.close(); }
+    try { await renderCompare(browser, args.compare, args.label, path.join(args.out, 'compare.png'), loadNeighbours(args.neighbours)); } finally { await browser.close(); }
     log(`  compare.png  (${args.compare.length} variants) → ${args.out}`);
     return;
   }
@@ -402,7 +430,7 @@ async function main() {
     const master = path.join(pdir, 'icon-1024.png');
     if (args.preview) {
       const file = path.join(pdir, 'preview.png');
-      await renderPreview(browser, master, args.label, file);
+      await renderPreview(browser, master, args.label, file, loadNeighbours(args.neighbours));
       log(`  preview.png  ← open this and look at it before deciding the icon is done`);
     }
     if (args.grid) {
