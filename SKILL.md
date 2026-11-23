@@ -40,10 +40,18 @@ App Store lookup when the network allows it), keep them in a folder outside the 
 as `--neighbours` for every render. Most category leaders are flat brand marks; rendered 3D objects
 are the exception (design-process §2a).
 
-Then write the concept note in the format shown there (App/tone · Market · Essence · Idea · Style ·
-Palette · Light).
-The idea must pass three tests: readable at **29pt** from silhouette alone; **ownable** ("could
-this be any app in the category?" must be *no*); **no collision** with a famous icon combo.
+Then write the concept note in the format shown there (App/tone · Market · Own words · Ideas ·
+Essence · Idea · Style · Palette · Light).
+**The idea is not one guess** — the same brief run twice once gave a 7 and a 5.5 from two different
+ideas. So (design-process §1): **list the app's own words** (the name taken literally, its tagline or
+thesis, the feature no competitor has); write **three ideas on different subjects**, at least one
+from the name or thesis and one from the unique feature; **rank them by where their ownership comes
+from** — own words > unique feature > category sign with a twist > category sign or abstract shape
+(reject); strike any that reads as a UI control (record button, badge, play, smiley) or generic
+finance; then **block out the top two flat and `--compare` them** among the neighbours before any
+style work. The chosen idea must pass three tests: readable at **29pt** from silhouette alone;
+**ownable** ("could this be any app in the category?" must be *no*); **no collision** with a famous
+icon combo.
 Use `references/metaphors.md` for category twists and `references/palettes.md` for colours.
 **Choose the style on purpose — this is where icon sets go monotonous.** Shortlist one style from
 the *graphic* family (H Brand Mark, F Letterform, E Luminous, D Paper, C Glass) and one from the

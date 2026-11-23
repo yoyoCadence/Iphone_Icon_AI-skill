@@ -24,26 +24,58 @@ corrects assumptions far faster than they answer questionnaires.
 
 ## 1. Find the idea (the step that separates a logo from a tile)
 
-Write the app's **essence in five words** (what feeling or job, not the feature list).
-Then list candidates on the **metaphor ladder**, at least one per rung:
+The idea is the biggest source of quality — and of luck. In field tests the same brief, run twice,
+gave a ≠ sign whose slash is a token slice (the app's own motto) and, the next time, a disc in a
+cup that read as a smiley: 7 versus 5.5 out of 10, from one brief. A good style rule cannot rescue a
+weak idea, so the idea step is not a single guess. Do it in this order:
 
+**a. Collect the app's own words** (one line in the concept note). Where an idea comes from decides
+how ownable it is. List what *only this app* says or has:
+- **the name, taken literally** — its meaning, pun or other-language reading (*DayPop* → pop;
+  *Forge* → heat and an anvil; 今晚吃命 "eat your fate tonight" → a die with a bite out of it;
+  *Morrow* → tomorrow);
+- **its own sentences** — tagline, h1, motto, thesis (a sidebar that prints "adoption ≠ holder
+  value"; "trace every number"). `extract_brand.py` prints the title, headings, description and
+  frequent words; also read the README's first paragraph and the UI copy;
+- **a feature no competitor has** — the mechanic, ritual or object at the heart of the app (guide
+  rollers riding a wall; dice, slot machine and card draw; a daily "order theatre");
+- **an existing mascot, motif or UI signature** (status lamps, an ink-line comic theme).
+
+**b. Write at least three ideas that are different subjects**, not three treatments of one. At
+least one must come from the name or the app's own sentences, and one from its unique feature.
+The **metaphor ladder** helps vary them:
 1. **Literal object** — the thing the app is about (coin, wave, leaf, terminal prompt).
 2. **Attribute / action** — what the object *does* (rising, curling, growing, blinking).
 3. **Feeling / result** — what the user gets (calm, momentum, clarity, warmth).
 4. **Letterform** — the initial, only if the brand already lives in its name.
-
 The best icons are usually **rung 1 with a rung-2 twist** ("a coin, *rising* as a stack of three
 that forms an arrow") or **rung 1 rendered so specifically it becomes rung 3** ("a legal pad's
 torn yellow edge" rather than "a notepad"). Pure rung 1 is clip-art; pure rung 3 is abstract mush.
 
-Score the finalists against three questions:
+**c. Rank them by where their ownership comes from** — this ranking, not novelty, decides:
+1. **the app's own words made visible** — the name or thesis turned into one image (bitten die,
+   ≠ slash, a page bursting for *Pop*);
+2. **a feature only this app has** — (rollers riding the wall);
+3. **the category's core sign with one twist** — (a calendar page whose missing day popped out);
+4. **the category sign alone, or an abstract shape** whose meaning lives only in the concept note
+   (a disc in a cup, a plain candlestick, a rising line) — reject.
+Then strike any idea that, at 60pt, reads as **a UI control or system symbol** — record button,
+notification badge, play, power, a smiley — or as **generic finance** (rising line, pie, candle)
+without a level-1 or level-2 twist. Those collisions were the commonest way good briefs ended weak.
+
+**d. Block out the top two as flat silhouettes and compare them** before choosing a style:
+`render.js --compare idea-a.svg idea-b.svg --out <dir> --neighbours <market>` — ten minutes of flat
+shapes, no material. Keep the one a stranger would name at 29pt *and* could only belong to this app.
+Ask of each:
 - **29pt test** — would the silhouette alone still say what it is at 29pt (settings list size)?
 - **Ownership test** — "could this be any app in the category?" If yes, it is not done.
 - **Collision test** — does it reuse a famous combo (green bubble, blue bird, red play triangle,
   rainbow camera, white *f* on blue, orange RSS arcs, yellow ghost)? If yes, change colour *and* form.
+If both fail, go back to (b); do not polish a weak idea into a style comparison.
 
 Keep **one** idea. Icons with two ideas lose both at 60pt. See `metaphors.md` for category
-starting points with their twists, and for the clichés to avoid.
+starting points with their twists, and for the clichés to avoid — but a twist from the app's own
+words beats any category twist from that file.
 
 ## 2. Read the market, then choose a style on purpose
 
@@ -165,6 +197,13 @@ drift where every icon slowly becomes "gradient + centred lit object" again:
 App / tone:  Bramble — plant-care reminders · warm · patient · tactile
 Market:      Planta (green tile, white leaf mark, flat) · Greg (white tile, green sprout, flat) ·
              PictureThis (photo-like leaf) → the category is green, flat and leafy
+Own words:   name "Bramble" (a wild, hardy shrub) · tagline "it grows because you came back" ·
+             unique feature: a watering streak that the plant visibly remembers
+Ideas:       ① pot whose rim is a check-mark (own words: "came back" = done) — level 1
+             ② a bramble sprig curling into a streak counter (name + feature) — level 1
+             ③ a watering can (category sign) — level 4, rejected
+             → ① vs ② blocked out among Planta and Greg; ① reads faster at 29pt and only
+               this app pairs the pot with "done"
 Essence:     it grows because you came back
 Shortlist:   graphic  — H Brand Mark: a terracotta pot silhouette whose rim is a check-mark, flat, cream tile
              illustr. — B Rendered Object: the pot seen from above, one sprout casting a long morning shadow
