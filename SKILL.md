@@ -47,8 +47,9 @@ ideas. So (design-process §1): **list the app's own words** (the name taken lit
 thesis, the feature no competitor has); write **three ideas on different subjects**, at least one
 from the name or thesis and one from the unique feature; **rank them by where their ownership comes
 from** — own words > unique feature > category sign with a twist > category sign or abstract shape
-(reject); strike any that reads as a UI control (record button, badge, play, smiley) or generic
-finance; then **block out the top two flat and `--compare` them** among the neighbours before any
+(reject); an abstract thesis must be translated into **one concrete object or scene**, because drawn
+literally it becomes a diagram (nodes, lines, arrows) that reads as a system glyph; strike any idea
+that reads as a UI control (record button, badge, play, smiley, sitemap) or generic finance; then **block out the top two flat and `--compare` them** among the neighbours before any
 style work. The chosen idea must pass three tests: readable at **29pt** from silhouette alone;
 **ownable** ("could this be any app in the category?" must be *no*); **no collision** with a famous
 icon combo.

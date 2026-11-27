@@ -40,7 +40,7 @@ how ownable it is. List what *only this app* says or has:
 - **a feature no competitor has** — the mechanic, ritual or object at the heart of the app (a pet
   that dozes off when you stop logging; an hourglass that pours while you focus; a roulette wheel
   that picks the film);
-- **an existing mascot, motif or UI signature** (a hand-drawn underline on every heading, a
+- **an existing mascot, motif or UI signature** (hand-drawn margin doodles beside every heading, a
   terminal-green caret).
 
 **b. Write at least three ideas that are different subjects**, not three treatments of one. At
@@ -61,9 +61,18 @@ torn yellow edge" rather than "a notepad"). Pure rung 1 is clip-art; pure rung 3
 3. **the category's core sign with one twist** — (a wallet with one card sliding out as an arrow);
 4. **the category sign alone, or an abstract shape** whose meaning lives only in the concept note
    (a plain coin, a lone tick, a rising line, a swirl) — reject.
+**Own words must become a picture, not a diagram.** A name like *Ember* is already an object; a
+thesis usually isn't ("nothing leaves your device", "measure twice, cut once", "every claim needs a
+source"). Drawn literally, an abstract thesis turns into a diagram — nodes and edges, a tree of dots,
+a flowchart, a line with markers, arrows between boxes — and a diagram reads as a sitemap, network
+or settings glyph, never as a brand. So translate the thesis into **one concrete object or scene
+that shows it**: "nothing leaves your device" → a letter sealed inside its own mailbox; "measure
+twice, cut once" → a folding ruler with one pencil tick. That translation ranks as level 1; the
+diagram of the thesis ranks as level 4.
 Then strike any idea that, at 60pt, reads as **a UI control or system symbol** — record button,
-notification badge, play, power, a smiley — or as **generic finance** (rising line, pie, candle)
-without a level-1 or level-2 twist. Those collisions were the commonest way good briefs ended weak.
+notification badge, play, power, a smiley, a share/network/sitemap glyph — or as **generic finance**
+(rising line, pie, candle) without a level-1 or level-2 twist. Those collisions were the commonest
+way good briefs ended weak.
 
 **d. Block out the top two as flat silhouettes and compare them** before choosing a style:
 `render.js --compare idea-a.svg idea-b.svg --out <dir> --neighbours <market>` — ten minutes of flat
