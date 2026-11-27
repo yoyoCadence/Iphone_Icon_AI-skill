@@ -63,6 +63,13 @@ private projects and are not pictured.)
 | memecoin research (regression) | flat folded M · 6.5 | flat candlestick-candle · 6 | style held |
 | comic calendar (regression) | flat ink calendar · 7 | comic-3D calendar with ink outline · 6.5 | tone from the app's own copy ("crafted") tipped it; it kept the ink-line language |
 
+> **Correction, added after round 3.** When round 2 ran, the rule text itself used these projects
+> as its examples: an anvil, a top-down race car, a lunch ticket and an iceberg as multi-part
+> pictograms; *Forge* and *GoGoGo* as tone sources; Mario Kart Tour as the hue example. Round-2 runs
+> could read all of that, so their gains are **partly contaminated** — treat this round as weak
+> evidence. The skill's examples are now invented apps, and `evals/check_heldout.py` fails if a term
+> from a held-out brief appears anywhere a run can read.
+
 **Results by group**
 
 - **Cases to fix:** three of four now choose a rendered style (average 6.1 → 6.75). The racing game
@@ -85,7 +92,59 @@ run per project, no score difference under about 1 point is evidence.
 - **In practice,** pick each project's icon from every finished candidate across runs, not from the
   last run alone.
 
+## Round 3 — the idea step, tested clean
+
+**Change** (`design-process.md` §1, `SKILL.md` step 2). The idea is no longer one guess:
+1. **List the app's own words.** That means the name taken literally, its tagline or thesis, the
+   feature no competitor has, and any existing motif. `extract_brand.py` now prints taglines and
+   headings.
+2. **Write three ideas on different subjects.**
+3. **Rank them by where their ownership comes from:** own words, then a unique feature, then a
+   category sign with a twist. A bare category sign or an abstract shape is rejected.
+4. **Strike any idea that reads as a UI control or as generic finance.**
+5. **Block out the top two flat and compare them** among the real leaders before any style work.
+
+**A first attempt was contaminated and stopped.** The new examples again quoted the test apps' own
+answers, and one run's report noticed. All examples were replaced with invented apps, a held-out term
+check was added, and the test restarted from scratch.
+
+**Method.** The three briefs with the lowest scores and the widest spread were used: holder-value
+research, the quant workstation and underwriting research. Each got two fresh blind runs.
+
+**Bar, set before the runs:**
+- every run lists its own words and at least three ideas;
+- every chosen idea comes from the app's own words or its unique feature;
+- the six runs average at least 7, and none scores below 6.5.
+
+![two earlier runs against two idea-step runs per brief](idea-variance.png)
+
+| Brief | Before (2 runs) | Idea step (2 runs) | Same idea both times? |
+|---|---|---|---|
+| holder-value research | ≠ · 7, token in a cradle · 5.5 | ≠ with unequal bars · 7, ≠ as a two-bar chart · 7 | yes — the app's own motto |
+| quant workstation | flat α on anvil · 6, chrome-pipe α · 6.5 | red-hot α on an anvil · 7, hot α bar on an anvil · 7 | yes — the name, taken literally |
+| underwriting research | iceberg · 6.5, nib on a chart line · 6 | line through a ring · 5.5, root tree · 6 | no — both were **diagrams** of an abstract thesis |
+
+**The process criteria passed (6 of 6). The score bar failed:** the six runs averaged 6.58, and the
+lowest was 5.5. The failure had one cause. The underwriting app's own words are abstract ("trace
+every number"). Drawn literally, they became diagrams — nodes, roots, a line with markers — which
+read as sitemap glyphs.
+
+**Targeted fix.** Own words must become a *picture*, not a diagram: an abstract thesis is translated
+into one concrete object or scene, and a diagram of it ranks with the rejected ideas. The
+underwriting brief was then re-run twice, against a bar set beforehand: both runs score at least
+6.5, and both choose an object rather than a diagram. **That bar passed:** both runs independently
+chose a pen nib signing a line — "underwrite" taken literally — at 6.5 each.
+
+**Verdict**
+- **Idea variance is fixed.** On all three briefs, both runs reached the same idea, and the score gap
+  between them went from 1.5 / 0.5 / 0.5 to 0 / 0 / 0.
+- **Quality rose, but not to the bar first set.** The three briefs averaged 6.25 before; under the
+  final rule they average 6.83, below the 7 aimed for.
+- **The remaining limit is the brief.** An app whose own words are abstract still lands on a
+  well-made but familiar sign: a nib suggests e-signatures before it suggests underwriting.
+- **The evidence is thin.** Each score is still one reviewer's eye, over two runs per brief.
+
 ## Cost
 
-About 190–270 k tokens and 3–17 minutes per run. That covers 9 runs in round 1 and 7 in round 2.
-Fourteen of the 16 stopped at a usage limit partway and were resumed.
+About 175–270 k tokens and 3–17 minutes per run. That covers 9 runs in round 1, 7 in round 2, 6 in
+round 3 and 2 for the targeted fix. Most stopped at a usage limit partway and were resumed.
