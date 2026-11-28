@@ -24,26 +24,69 @@ corrects assumptions far faster than they answer questionnaires.
 
 ## 1. Find the idea (the step that separates a logo from a tile)
 
-Write the app's **essence in five words** (what feeling or job, not the feature list).
-Then list candidates on the **metaphor ladder**, at least one per rung:
+The idea is the biggest source of quality — and of luck. In field tests the same brief, run twice,
+produced ideas 1.5 points apart out of 10: once a symbol taken from the app's own motto, once an
+abstract shape that read as a smiley. A good style rule cannot rescue a
+weak idea, so the idea step is not a single guess. Do it in this order:
 
+**a. Collect the app's own words** (one line in the concept note). Where an idea comes from decides
+how ownable it is. List what *only this app* says or has:
+- **the name, taken literally** — its meaning, pun or other-language reading (*Ember*, a journal →
+  one coal kept alive overnight; *Nudge*, reminders → an elbow tipping a domino; 慢慢來 "take your
+  time", a savings app → a snail carrying a coin);
+- **its own sentences** — tagline, h1, motto, thesis (a header that reads "no streak shaming"; a
+  footer that says "every receipt, one tap"). `extract_brand.py` prints the title, headings, description and
+  frequent words; also read the README's first paragraph and the UI copy;
+- **a feature no competitor has** — the mechanic, ritual or object at the heart of the app (a pet
+  that dozes off when you stop logging; an hourglass that pours while you focus; a roulette wheel
+  that picks the film);
+- **an existing mascot, motif or UI signature** (hand-drawn margin doodles beside every heading, a
+  terminal-green caret).
+
+**b. Write at least three ideas that are different subjects**, not three treatments of one. At
+least one must come from the name or the app's own sentences, and one from its unique feature.
+The **metaphor ladder** helps vary them:
 1. **Literal object** — the thing the app is about (coin, wave, leaf, terminal prompt).
 2. **Attribute / action** — what the object *does* (rising, curling, growing, blinking).
 3. **Feeling / result** — what the user gets (calm, momentum, clarity, warmth).
 4. **Letterform** — the initial, only if the brand already lives in its name.
-
 The best icons are usually **rung 1 with a rung-2 twist** ("a coin, *rising* as a stack of three
 that forms an arrow") or **rung 1 rendered so specifically it becomes rung 3** ("a legal pad's
 torn yellow edge" rather than "a notepad"). Pure rung 1 is clip-art; pure rung 3 is abstract mush.
 
-Score the finalists against three questions:
+**c. Rank them by where their ownership comes from** — this ranking, not novelty, decides:
+1. **the app's own words made visible** — the name or thesis turned into one image (the coal kept
+   alive for *Ember*, the snail with a coin for 慢慢來);
+2. **a feature only this app has** — (the dozing pet; the pouring hourglass);
+3. **the category's core sign with one twist** — (a wallet with one card sliding out as an arrow);
+4. **the category sign alone, or an abstract shape** whose meaning lives only in the concept note
+   (a plain coin, a lone tick, a rising line, a swirl) — reject.
+**Own words must become a picture, not a diagram.** A name like *Ember* is already an object; a
+thesis usually isn't ("nothing leaves your device", "measure twice, cut once", "every claim needs a
+source"). Drawn literally, an abstract thesis turns into a diagram — nodes and edges, a tree of dots,
+a flowchart, a line with markers, arrows between boxes — and a diagram reads as a sitemap, network
+or settings glyph, never as a brand. So translate the thesis into **one concrete object or scene
+that shows it**: "nothing leaves your device" → a letter sealed inside its own mailbox; "measure
+twice, cut once" → a folding ruler with one pencil tick. That translation ranks as level 1; the
+diagram of the thesis ranks as level 4.
+Then strike any idea that, at 60pt, reads as **a UI control or system symbol** — record button,
+notification badge, play, power, a smiley, a share/network/sitemap glyph — or as **generic finance**
+(rising line, pie, candle) without a level-1 or level-2 twist. Those collisions were the commonest
+way good briefs ended weak.
+
+**d. Block out the top two as flat silhouettes and compare them** before choosing a style:
+`render.js --compare idea-a.svg idea-b.svg --out <dir> --neighbours <market>` — ten minutes of flat
+shapes, no material. Keep the one a stranger would name at 29pt *and* could only belong to this app.
+Ask of each:
 - **29pt test** — would the silhouette alone still say what it is at 29pt (settings list size)?
 - **Ownership test** — "could this be any app in the category?" If yes, it is not done.
 - **Collision test** — does it reuse a famous combo (green bubble, blue bird, red play triangle,
   rainbow camera, white *f* on blue, orange RSS arcs, yellow ghost)? If yes, change colour *and* form.
+If both fail, go back to (b); do not polish a weak idea into a style comparison.
 
 Keep **one** idea. Icons with two ideas lose both at 60pt. See `metaphors.md` for category
-starting points with their twists, and for the clichés to avoid.
+starting points with their twists, and for the clichés to avoid — but a twist from the app's own
+words beats any category twist from that file.
 
 ## 2. Read the market, then choose a style on purpose
 
@@ -96,24 +139,24 @@ chosen for contrast. Then `render.js --compare a.svg b.svg --neighbours <folder>
    a reason — every flat mark reads faster than every lit object.
 2. **Gate: mark, not pictogram (graphic candidates only).** A flat candidate must be *one
    silhouette*: a letter, a symbol, or parts fused into one outline, with any detail cut into it
-   as negative space. Count the separately drawn parts the idea needs to read. Three or more — a car
-   body plus tyres, rollers and a wall; an iceberg tip plus three facets; a ticket plus a stub plus
-   a bowl — and the flat version is a toolbar pictogram, not a brand mark: it is out, and the idea
-   belongs to the illustrative candidate (or goes back to be reduced to one silhouette). Exception:
-   the brand's own visual language is flat illustration (a comic ink-line UI) and the candidate is
-   drawn in it.
+   as negative space. Count the separately drawn parts the idea needs to read. Three or more — a
+   bicycle plus wheels, chain and rider; a house plus door, windows and chimney; a mug plus steam
+   plus a saucer — and the flat version is a toolbar pictogram, not a brand mark: it is out, and
+   the idea belongs to the illustrative candidate (or goes back to be reduced to one silhouette).
+   Exception: the brand's own visual language is flat illustration (a hand-drawn sketchbook UI)
+   and the candidate is drawn in it.
 3. **Gate: distance.** Each candidate must differ from *every* leader on at least two of style
    family, hue family and silhouette; one that doesn't is out (or goes back for a new hue or
    silhouette). **Hue family is what dominates the whole icon by area — tile and mark together —
-   not the tile alone:** a blue tile does not share a hue with Mario Kart Tour, whose icon reads
-   red. Passing is enough — more distance is not a reason to win. Ranking on style family rigs the
+   not the tile alone:** a blue tile does not share a hue with an icon that is a large red
+   character on a blue backdrop — that icon reads red. Passing is enough — more distance is not a reason to win. Ranking on style family rigs the
    choice: in a category of flat marks every illustrative candidate "wins" automatically (a test run
    picked a retro cassette for a brief that asked for rebellious and modern).
 4. **Tone decides between candidates that passed every gate.** Warm · homey · cozy · tactile ·
    crafted · nostalgic · kids · playful-game · premium-object lean illustrative; confident · modern ·
    minimal · precise · utility · fast · rebellious lean graphic. Name the words that decided it.
    - **Read tone from what the user sees, not from how the code works:** the name's promise
-     (*Forge* is heat, *GoGoGo* is energy), the UI and its theme, the existing icon, the audience.
+     (*Ember* is warmth, *Dash* is speed), the UI and its theme, the existing icon, the audience.
      A README's account of method — rigorous, auditable, reproducible, sober — describes the
      engineering; every serious tool says it, so it is not a tone. If a README is all you have, say
      so in the concept note and treat the tone as neutral.
@@ -126,10 +169,10 @@ Never break a tie toward "more volume", "fewer pixels" or "more different" — e
 set of test icons into one formula (eight lit objects in a row; then eight flat marks; then a
 cassette chosen over the brief's own tone). Under equal fidelity, the warm home-cooking brief chose a
 rendered pot and the minimal rain-alert brief a flat mark, each decided by tone. Then ten real
-projects under the two-gate rule chose flat eight times in nine: the ≠ sign, the folded M and the
-allocation ring were right, but an anvil, a top-down race car, a lunch ticket and an iceberg came out
-as multi-part flat pictograms whose rendered runners-up were better, two of them decided by "sober"
-and "rigorous" lifted from a README. Gates 1–2 and the tone sources above are the fix.
+projects under the two-gate rule chose flat eight times in nine: the single-symbol marks were right,
+but four objects made of several parts came out as flat pictograms whose rendered runners-up were
+better, two of them decided by "sober" and "rigorous" lifted from a README. Gates 1–2 and the tone
+sources above are the fix.
 
 **Differentiate on at least two axes** from each leader: style family, hue family, silhouette.
 A flat green disc for a music app differs from Spotify on zero axes that matter; a flat mark on a
@@ -165,6 +208,13 @@ drift where every icon slowly becomes "gradient + centred lit object" again:
 App / tone:  Bramble — plant-care reminders · warm · patient · tactile
 Market:      Planta (green tile, white leaf mark, flat) · Greg (white tile, green sprout, flat) ·
              PictureThis (photo-like leaf) → the category is green, flat and leafy
+Own words:   name "Bramble" (a wild, hardy shrub) · tagline "it grows because you came back" ·
+             unique feature: a watering streak that the plant visibly remembers
+Ideas:       ① pot whose rim is a check-mark (own words: "came back" = done) — level 1
+             ② a bramble sprig curling into a streak counter (name + feature) — level 1
+             ③ a watering can (category sign) — level 4, rejected
+             → ① vs ② blocked out among Planta and Greg; ① reads faster at 29pt and only
+               this app pairs the pot with "done"
 Essence:     it grows because you came back
 Shortlist:   graphic  — H Brand Mark: a terracotta pot silhouette whose rim is a check-mark, flat, cream tile
              illustr. — B Rendered Object: the pot seen from above, one sprout casting a long morning shadow

@@ -115,6 +115,21 @@ def main(argv):
     top = [w for w, _ in Counter(w.lower() for w in words if w.lower() not in stop).most_common(12)]
     print("\n== frequent words in the copy (what the app is about) ==")
     print("  " + ", ".join(top) if top else "  (no visible copy)")
+
+    # The app's own words: headings and tagline-like elements. Ideas drawn from these (the name
+    # taken literally, a motto, a thesis) are the most ownable — see design-process §1a.
+    body = re.sub(r"<script.*?</script>|<style.*?</style>", " ", text, flags=re.S | re.I)
+    own = []
+    # taglines and notes first (most ownable), then headings
+    pats = [r"<(?:p|div|span|small|strong|em|a)[^>]*class=[\"'][^\"']*(?:tagline|subtitle|slogan|motto|lead|hero|eyebrow|brand|kicker|thesis|note|claim|quote)[^\"']*[\"'][^>]*>(.*?)</(?:p|div|span|small|strong|em|a)>",
+            r"<h[1-3][^>]*>(.*?)</h[1-3]>"]
+    for pat in pats:
+        for m in re.findall(pat, body, re.I | re.S):
+            t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", m)).strip()
+            if 2 <= len(t) <= 80 and t not in own:
+                own.append(t)
+    print("\n== own words (headings, taglines — mine these for the idea) ==")
+    print("\n".join(f"  {t}" for t in own[:14]) if own else "  (none found — read the README's first paragraph and the UI copy)")
     return 0
 
 

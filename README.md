@@ -76,7 +76,8 @@ delivers. One to three material rounds is normal — that is the process working
   how its style rule went from all-3D to all-flat to choosing by tone. → [docs/market-benchmark.md](docs/market-benchmark.md)
 - **Ten real projects** — the skill run on one developer's ten most-committed apps; it found
   multi-part flat pictograms and README-derived tone, led to a mark-not-pictogram gate, and was
-  re-run blind (three of four fixed, one not; idea variance named as the next lever).
+  re-run blind; then an idea step (the app's own words → three ideas → ranked → blocked out) made
+  repeat runs land on the same idea every time, tested with held-out briefs the skill never sees.
   → [docs/field-test-real-apps.md](docs/field-test-real-apps.md)
 - **Showcase** — eight icons from fresh runs, unretouched, scored honestly (6/10 to 8/10) with the
   skill's remaining bias named. → [docs/showcase.md](docs/showcase.md)
@@ -162,7 +163,7 @@ Claude 會寫概念筆記 → 先用平塗色塊打底、在 29pt 和搶眼鄰�
 
 ### 實測
 - **市場對照**：以八個類別的 App Store 真實龍頭為對照測試 skill；風格規則從「全是 3D」到「全是扁平」，再到「依調性選擇」的過程。→ [docs/market-benchmark.md](docs/market-benchmark.md)
-- **十個真實專案**：用同一位開發者提交數最多的十個 app 實跑；揪出「多零件扁平小圖示」與「從 README 讀調性」兩個問題，新增「標誌而非小圖示」關卡後盲測重跑（四個修好三個、一個沒修好），並指出下一個槓桿是概念本身的變異。→ [docs/field-test-real-apps.md](docs/field-test-real-apps.md)
+- **十個真實專案**：用同一位開發者提交數最多的十個 app 實跑；揪出「多零件扁平小圖示」與「從 README 讀調性」兩個問題，新增「標誌而非小圖示」關卡後盲測重跑；再加入「點子步驟」（app 自己的話 → 三個點子 → 排序 → 打底比較），讓同一題重跑每次都收斂到同一個點子，並以 skill 永遠看不到的保留題目驗證。→ [docs/field-test-real-apps.md](docs/field-test-real-apps.md)
 - **作品展示**：八個由全新執行產出、未經修圖的 icon，逐一誠實評分（6～8 分），並寫明 skill 目前的系統性偏差。→ [docs/showcase.md](docs/showcase.md)
 - **評測**：三個情境、有／無 skill 對照、三輪迭代；第一輪曾輸 1 場（主畫面尺寸下太不醒目），修正過程有完整紀錄，最新版本在每個情境都勝出或持平；觸發測試 20 個真實與易混淆查詢 60/60 全對。→ [docs/evals.md](docs/evals.md)
 - **真實專案實測**：一個有自己 icon 建置、e2e icon 測試與 service worker 的 PWA；新設計通過該專案自己的測試，而這次實測也揪出並修正了 skill 最具破壞性的幾個 bug。→ [docs/field-test-orbit.md](docs/field-test-orbit.md)

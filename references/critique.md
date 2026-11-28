@@ -71,6 +71,9 @@ by surviving the 29pt test; otherwise delete it. Grain/sheen must be invisible a
 | a flat icon looks like a toolbar / settings glyph, not an app | it is a multi-part pictogram: fuse it into one silhouette, or switch to the illustrative candidate and render the object |
 | a game icon looks like a utility | the read gate failed: games need character, motion or a rendered object — not a flat diagram of the subject |
 | flat parts accidentally form another symbol (peace sign, Y, cross) | seams and gaps read as lines at 60pt — remove a seam or merge two parts |
+| it reads as a UI control — record button, notification badge, play, power, smiley | an idea problem, not a finish problem: go back to the idea ranking (design-process §1c) and take the next idea from the app's own words |
+| it reads as a sitemap, network or flowchart glyph | the thesis was drawn as a diagram: translate it into one concrete object or scene that shows it (design-process §1c) |
+| the meaning only exists in the concept note | the idea is an abstract shape (level 4): replace it with one drawn from the name, thesis or unique feature |
 | every draft comes out as a lit 3D object | you defaulted to the illustrative family — block out a graphic-family alternative and compare among the market neighbours |
 | looks like a category leader | change at least two of: style family, hue family, silhouette |
 | muddy gradient | mid-stop; shift top toward yellow, bottom toward blue/violet |

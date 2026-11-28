@@ -1,0 +1,29 @@
+# Terms that identify held-out test briefs (real projects used to validate the skill) and the answers
+# earlier runs gave them. None may appear in SKILL.md, references/, assets/examples/ or scripts/ —
+# an agent that reads them is no longer being tested. One term per line, case-insensitive.
+alphafactorforge
+anvil
+forge
+daypop
+carplay
+mini 4wd
+guide roller
+gogogo
+lunch ticket
+bento
+order theatre
+underwrit
+iceberg
+trace every number
+holder value
+持有人
+≠
+morrow
+ticker tape
+吃命
+dinner-by-destiny
+bitten die
+pen nib
+rooted
+observed
+underline
